@@ -115,11 +115,30 @@ button {
 }
 
 /* Responsive adjustments */
+@media (max-width: 1024px) {
+  .container {
+    max-width: 960px;
+  }
+}
+
 @media (max-width: 768px) {
   .section-title {
     font-size: 2rem;
   }
   .section {
-    padding: 4rem 0;
+    padding: 3.5rem 0;
+  }
+  .container {
+    padding: 0 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-title {
+    font-size: 1.75rem;
+  }
+  .section-subtitle {
+    margin-bottom: 2.5rem;
+    font-size: 0.75rem;
   }
 }

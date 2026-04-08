@@ -1,8 +1,9 @@
 export const categories = [
   { id: 'astrology', name_en: 'Astrology', name_ta: 'ஜோதிடம்' },
   { id: 'yoga', name_en: 'Yoga', name_ta: 'யோகா' },
-  { id: 'acupuncture', name_en: 'Acupuncture', name_ta: 'அக்குபஞ்சர்' },
-  { id: 'tuition', name_en: 'Education', name_ta: 'கல்வி' }
+  { id: 'acupuncture', name_en: 'Acupuncture & Varma', name_ta: 'அக்குபஞ்சர் & வர்மம்' },
+  { id: 'tuition', name_en: 'Education', name_ta: 'கல்வி' },
+  { id: 'extracurricular', name_en: 'Extra Curricular', name_ta: 'இணைச் செயல்பாடுகள்' }
 ];
 
 export const allServices = [
@@ -32,13 +33,21 @@ export const allServices = [
   { id: 27, category: 'yoga', title: 'Surya Namaskaram (சூர்ய நமஸ்காரம்)', description: 'A sequence of 12 powerful yoga asanas dedicated to the Sun God.', icon: '🌞', benefits: ['Full Body Workout', 'Glowing Skin', 'Weight Loss'] },
   { id: 28, category: 'yoga', title: 'Hasana (ஆசனம்)', description: 'Physical postures designed to purify the body and provide strength.', icon: '🤸', benefits: ['Posture Correction', 'Endurance', 'Flexibility'] },
 
-  // Acupuncture
-  { id: 14, category: 'acupuncture', title: 'Classical (பாரம்பரிய)', description: 'Balancing the flow of energy through precise point stimulation.', icon: '📍', benefits: ['Pain Relief', 'Energy Flow', 'Natural Healing'] },
-  { id: 15, category: 'acupuncture', title: 'Pain Management (வலி மேலாண்மை)', description: 'Specialized treatments for chronic pain and muscular issues.', icon: '⚡', benefits: ['Reduces Inflammation', 'Mobility', 'Comfort'] },
+  // Acupuncture & Varma
+  { id: 14, category: 'acupuncture', title: 'Acupuncture (அக்குபஞ்சர்)', description: 'Balancing the flow of energy through precise point stimulation.', icon: '📍', benefits: ['Pain Relief', 'Energy Flow', 'Natural Healing'] },
+  { id: 15, category: 'acupuncture', title: 'Varma Kalai (வர்ம கலை)', description: 'Ancient Tamil martial and healing art focusing on vital points.', icon: '✋', benefits: ['Nerve Stimulation', 'Pain Relief', 'Internal Healing'] },
   { id: 16, category: 'acupuncture', title: 'Wellness Therapy (நலவாழ்வு சிகிச்சை)', description: 'Immune boosting and holistic health maintenance.', icon: '🌱', benefits: ['Immunity Boost', 'Detoxification', 'Vitality'] },
 
   // Education
-  { id: 17, category: 'tuition', title: 'School Subjects (பள்ளி பாடங்கள்)', description: 'Holistic tutoring for Mathematics, Science and more for all grades.', icon: '🎓', benefits: ['Better Grades', 'Understanding', 'Confidence'] },
-  { id: 18, category: 'tuition', title: 'Skill Development (திறன் மேம்பாடு)', description: 'Enhancing cognitive and soft skills for competitive exams.', icon: '💡', benefits: ['Problem Solving', 'Communication', 'Career Growth'] },
-  { id: 19, category: 'tuition', title: 'Vedic Math (வேத கணிதம்)', description: 'Fast calculation techniques using ancient mathematical systems.', icon: '📐', benefits: ['Speed Math', 'Brain Power', 'Accuracy'] }
+  { id: 17, category: 'tuition', title: 'Spoken English (ஆங்கிலம்)', description: 'Improve your English speaking skills with interactive sessions.', icon: '🗣️', benefits: ['Fluency', 'Confidence', 'Global Communication'] },
+  { id: 18, category: 'tuition', title: 'Spoken Hindi (இந்தி)', description: 'Learn conversational Hindi for everyday use and travel.', icon: '🇮🇳', benefits: ['Conversational Skills', 'Travel friendly', 'Cultural Connection'] },
+  { id: 19, category: 'tuition', title: 'Spoken French (பிரெஞ்சு)', description: 'Master French phrasing and conversational fluency.', icon: '🇫🇷', benefits: ['Global Language', 'Career Growth', 'Pronunciation'] },
+  { id: 32, category: 'tuition', title: 'Drawing (ஓவியம்)', description: 'Creative art classes to enhance imagination and fine motor skills.', icon: '🎨', benefits: ['Creativity', 'Focus', 'Artistic Skills'] },
+  { id: 33, category: 'tuition', title: 'Abacus (அபாகஸ்)', description: 'Mental math training for high-speed calculation and brain development.', icon: '🧮', benefits: ['Speed Math', 'Memory', 'Brain Power'] },
+  { id: 34, category: 'tuition', title: 'School Subjects (பள்ளி பாடங்கள்)', description: 'Comprehensive tutoring for science, math, and general subjects.', icon: '📚', benefits: ['Academic Excellence', 'Concept Clarity', 'Better Grades'] },
+
+  // Extra Curricular
+  { id: 29, category: 'extracurricular', title: 'Sports (விளையாட்டு)', description: 'Physical activities for fitness, teamwork, and overall growth.', icon: '🏅', benefits: ['Physical Health', 'Teamwork', 'Discipline'] },
+  { id: 30, category: 'extracurricular', title: 'Chess (சதுரங்கம்)', description: 'Strategic board game to enhance concentration and critical thinking.', icon: '♟️', benefits: ['Focus', 'Strategy', 'Mental Acuity'] },
+  { id: 31, category: 'extracurricular', title: 'Carrom Board (கேரம் போர்டு)', description: 'Indoor board game for fine motor skills and family bonding.', icon: '🎯', benefits: ['Hand-Eye Coordination', 'Focus', 'Recreation'] }
 ];

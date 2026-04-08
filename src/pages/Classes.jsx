@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import './Classes.css';
+import SuccessModal from '../components/SuccessModal';
 
 const initialClasses = [
-  { id: 1, title_en: "Introduction to Vastu Shastra", title_ta: "வாஸ்து சாஸ்திரம் அறிமுகம்", date: "2026-04-10", price: 1500, attendees: 12 },
-  { id: 2, title_en: "Advanced KP Astrology", title_ta: "உயர்தர கே.பி ஜோதிடம்", date: "2026-04-15", price: 3000, attendees: 8 }
+  { id: 1, title_en: "Introduction to Vastu Shastra", title_ta: "வாஸ்து சாஸ்திரம் அறிமுகம்", date: "2026-04-10", price: 1500, attendees: 12, thumbnail: "/vastu_thumbnail.png" },
+  { id: 2, title_en: "Advanced KP Astrology", title_ta: "உயர்தர கே.பி ஜோதிடம்", date: "2026-04-15", price: 3000, attendees: 8, thumbnail: "/astrology_thumbnail.png" }
 ];
 
 const Classes = () => {
@@ -17,11 +18,16 @@ const Classes = () => {
   const [showModal, setShowModal] = useState(false);
   const [enrollingClass, setEnrollingClass] = useState(null);
   
+  // Success Modal State
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  
   // New Class State
   const [newTitleEn, setNewTitleEn] = useState('');
   const [newTitleTa, setNewTitleTa] = useState('');
   const [newDate, setNewDate] = useState('');
   const [newPrice, setNewPrice] = useState('');
+  const [newThumbnail, setNewThumbnail] = useState('');
 
   useEffect(() => {
     localStorage.setItem('aadhiguru_classes', JSON.stringify(classes));
@@ -37,11 +43,12 @@ const Classes = () => {
       title_ta: newTitleTa || newTitleEn,
       date: newDate,
       price: Number(newPrice),
-      attendees: 0
+      attendees: 0,
+      thumbnail: newThumbnail || '/astrology_thumbnail.png'
     };
     
     setClasses([...classes, newClass]);
-    setNewTitleEn(''); setNewTitleTa(''); setNewDate(''); setNewPrice('');
+    setNewTitleEn(''); setNewTitleTa(''); setNewDate(''); setNewPrice(''); setNewThumbnail('');
   };
 
   const handleRemoveClass = (id) => {
@@ -54,8 +61,9 @@ const Classes = () => {
   };
 
   const handlePayment = () => {
-    // Mock Payment Process
-    alert(`Payment of ₹${enrollingClass.price} successful! You are successfully enrolled in ${enrollingClass.title_en}.`);
+    // Show premium success modal instead of alert
+    setSuccessMessage(`Payment of ₹${enrollingClass.price} successful! You are successfully enrolled in ${enrollingClass.title_en}.`);
+    setShowSuccess(true);
     
     setClasses(classes.map(c => 
       c.id === enrollingClass.id ? { ...c, attendees: c.attendees + 1 } : c
@@ -94,6 +102,9 @@ const Classes = () => {
                 <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} required />
                 <input type="number" placeholder="Price (₹)" value={newPrice} onChange={e => setNewPrice(e.target.value)} required />
               </div>
+              <div className="form-row">
+                <input type="url" placeholder="Thumbnail URL (Optional)" value={newThumbnail} onChange={e => setNewThumbnail(e.target.value)} />
+              </div>
               <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>Add Class</button>
             </form>
           </div>
@@ -105,6 +116,9 @@ const Classes = () => {
           ) : (
             classes.map(cls => (
               <div key={cls.id} className="class-card">
+                <div className="class-thumbnail">
+                  <img src={cls.thumbnail || (cls.title_en.includes('Vastu') ? '/vastu_thumbnail.png' : '/astrology_thumbnail.png')} alt={cls.title_en} loading="lazy" />
+                </div>
                 <div className="class-content">
                   <h3 className="class-title-en">{cls.title_en}</h3>
                   <h4 className="class-title-ta">{cls.title_ta}</h4>
@@ -133,28 +147,63 @@ const Classes = () => {
 
         {/* Mock Payment Modal */}
         {showModal && enrollingClass && (
-          <div className="modal-overlay">
-            <div className="modal-content">
-              <h3>Checkout | கட்டணம்</h3>
-              <p>You are applying for: <strong>{enrollingClass.title_en}</strong></p>
-              <p className="price-tag">Total: ₹{enrollingClass.price}</p>
+          <div className="modal-overlay fade-in" onClick={() => setShowModal(false)}>
+            <div className="modal-content scale-up" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Checkout | கட்டணம்</h3>
+                <button className="close-btn" onClick={() => setShowModal(false)}>&times;</button>
+              </div>
+              
+              <div className="order-summary">
+                <span className="summary-label">Applying for:</span>
+                <span className="summary-title">{enrollingClass.title_en}</span>
+                <div className="summary-total">
+                  <span>Total Amount</span>
+                  <span className="price-value">₹{enrollingClass.price}</span>
+                </div>
+              </div>
               
               <div className="payment-form">
-                <input type="text" placeholder="Cardholder Name" defaultValue="Demo User" />
-                <input type="text" placeholder="Card Number" defaultValue="XXXX XXXX XXXX XXXX" />
+                <div className="input-group">
+                  <label>Cardholder Name</label>
+                  <input type="text" placeholder="e.g. John Doe" defaultValue="Demo User" />
+                </div>
+                
+                <div className="input-group">
+                  <label>Card Number</label>
+                  <input type="text" placeholder="XXXX XXXX XXXX XXXX" defaultValue="XXXX XXXX XXXX XXXX" />
+                </div>
+                
                 <div className="form-row">
-                  <input type="text" placeholder="MM/YY" defaultValue="12/26" />
-                  <input type="text" placeholder="CVC" defaultValue="123" />
+                  <div className="input-group">
+                    <label>Expiry (MM/YY)</label>
+                    <input type="text" placeholder="MM/YY" defaultValue="12/26" />
+                  </div>
+                  <div className="input-group">
+                    <label>Security Code</label>
+                    <input type="text" placeholder="CVC" defaultValue="123" />
+                  </div>
                 </div>
               </div>
 
               <div className="modal-actions">
-                <button className="btn btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
-                <button className="btn btn-primary" onClick={handlePayment}>Pay & Enroll</button>
+                <button className="btn cancel-btn" onClick={() => setShowModal(false)}>Cancel</button>
+                <button className="btn pay-btn" onClick={handlePayment}>Pay & Enroll</button>
               </div>
             </div>
           </div>
         )}
+        
+        <SuccessModal 
+          isOpen={showSuccess}
+          onClose={() => {
+            setShowSuccess(false);
+            setEnrollingClass(null);
+          }}
+          title="Enrollment Successful!"
+          message={successMessage}
+          actionText="View Classes"
+        />
         
       </div>
     </section>

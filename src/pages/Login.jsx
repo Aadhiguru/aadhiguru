@@ -1,18 +1,82 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../supabaseClient';
 import './Login.css';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Form fields
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleToggleMode = () => {
     setIsLogin(!isLogin);
+    setUsername('');
+    setEmail('');
+    setPassword('');
   };
 
   const handleToggleRole = (role) => {
     setIsAdmin(role === 'admin');
   };
 
+  const handleSignUpSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          username: username,
+          role: isAdmin ? 'admin' : 'user'
+        }
+      }
+    });
+
+    if (error) {
+      alert(error.message);
+    } else {
+      alert('Sign up successful! Please check your email for verification.');
+      setIsLogin(true);
+    }
+    setLoading(false);
+  };
+
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      alert(error.message);
+    } else {
+      // Store user role and navigate
+      const userRole = data.user?.user_metadata?.role || 'user';
+      
+      // For the demo/simple usage, we can store in localStorage to persist across components
+      localStorage.setItem('userPhone', email); // Using email as identifier if phone isn't provided
+      
+      if (userRole === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    }
+    setLoading(false);
+  };
+
+  // ── Main Login / Sign Up Form ─────────────────────────────────
   return (
     <div className="login-page">
       <div className="login-container">
@@ -22,13 +86,13 @@ const Login = () => {
         </div>
 
         <div className="role-toggle">
-          <button 
+          <button
             className={`role-btn ${!isAdmin ? 'active' : ''}`}
             onClick={() => handleToggleRole('user')}
           >
             User
           </button>
-          <button 
+          <button
             className={`role-btn ${isAdmin ? 'active' : ''}`}
             onClick={() => handleToggleRole('admin')}
           >
@@ -36,22 +100,40 @@ const Login = () => {
           </button>
         </div>
 
-        <form className="login-form">
+        <form className="login-form" onSubmit={isLogin ? handleLoginSubmit : handleSignUpSubmit}>
           {!isLogin && !isAdmin && (
             <div className="input-group">
-              <label>Full Name</label>
-              <input type="text" placeholder="Enter your full name" required />
+              <label>Username</label>
+              <input
+                type="text"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
             </div>
           )}
 
           <div className="input-group">
-            <label>{isAdmin ? 'Admin ID / Email' : 'Email or Mobile Number'}</label>
-            <input type="text" placeholder={isAdmin ? "Enter admin ID" : "Enter email or mobile number"} required />
+            <label>{isAdmin ? 'Admin ID' : 'Email'}</label>
+            <input
+              type="text"
+              placeholder={isAdmin ? 'Enter admin ID' : 'Enter your email'}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
 
           <div className="input-group">
             <label>Password</label>
-            <input type="password" placeholder="Enter your password" required />
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
 
           {isLogin && (
@@ -63,15 +145,13 @@ const Login = () => {
             </div>
           )}
 
-          <button type="submit" className="login-submit-btn">
-            {isLogin ? 'Sign In' : 'Sign Up'}
+          <button type="submit" className="login-submit-btn" disabled={loading}>
+            {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Sign Up')}
           </button>
 
           {!isAdmin && (
             <>
-              <div className="divider">
-                <span>OR</span>
-              </div>
+              <div className="divider"><span>OR</span></div>
               <button type="button" className="google-btn">
                 <svg width="20" height="20" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -88,7 +168,7 @@ const Login = () => {
 
         {!isAdmin && (
           <div className="toggle-mode">
-            {isLogin ? "Don't have an account? " : "Already have an account? "}
+            {isLogin ? "Don't have an account? " : 'Already have an account? '}
             <span onClick={handleToggleMode} className="toggle-link">
               {isLogin ? 'Sign up' : 'Log in'}
             </span>

@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../supabaseClient';
 import './CreateProfile.css';
 
 const CreateProfile = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     profileFor: 'Myself',
     name: '',
     gender: 'male',
     dob: '',
-    maritalStatus: 'Unmarried',
+    maritalStatus: 'First Marriage',
+    noOfChildren: '',
+    childrenLivingStatus: '',
     religion: 'Hindu',
     caste: '',
     subCaste: '',
@@ -46,11 +50,49 @@ const CreateProfile = () => {
     window.scrollTo(0, 0);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate API call to create profile
-    alert('Profile Created Successfully! Finding your perfect matches...');
-    navigate('/matrimony?created=true');
+    setLoading(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from('matrimony_profiles')
+        .insert([{
+          user_id: user?.id,
+          gender: formData.gender,
+          name: formData.name,
+          age: parseInt(formData.dob ? (new Date().getFullYear() - new Date(formData.dob).getFullYear()) : 25),
+          religion: formData.religion,
+          caste: formData.caste,
+          sub_caste: formData.subCaste,
+          star: formData.star,
+          rasi: formData.rasi,
+          height: formData.height || "5'5\"",
+          education: formData.education,
+          profession: formData.profession,
+          location: formData.city,
+          income: formData.income,
+          complexion: formData.complexion || 'Wheatish',
+          diet: formData.diet || 'Vegetarian',
+          mother_tongue: formData.motherTongue,
+          father_occ: formData.fatherOcc,
+          mother_occ: formData.motherOcc,
+          marital_status: formData.maritalStatus,
+          about: formData.about
+        }]);
+
+      if (error) throw error;
+
+      alert('Profile Created Successfully! Finding your perfect matches...');
+      navigate('/matrimony?created=true');
+    } catch (error) {
+      console.error('Error creating profile:', error);
+      alert('Error creating profile: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -111,14 +153,59 @@ const CreateProfile = () => {
                     <input type="date" name="dob" required value={formData.dob} onChange={handleChange} />
                   </div>
                   <div className="form-group">
-                    <label>Marital Status</label>
-                    <select name="maritalStatus" value={formData.maritalStatus} onChange={handleChange}>
-                      <option>Unmarried</option>
-                      <option>Widow / Widower</option>
-                      <option>Divorced</option>
-                      <option>Separated</option>
-                    </select>
+                    <label>Marital Status | திருமண நிலை</label>
+                    <div className="marital-pills">
+                      {[
+                        { val: 'First Marriage',   icon: '💍', label: 'First Marriage' },
+                        { val: 'Second Marriage',  icon: '🔄', label: 'Second Marriage' },
+                        { val: 'Divorced',         icon: '📋', label: 'Divorced' },
+                        { val: 'Widow',            icon: '🕊️', label: 'Widow' },
+                        { val: 'Widower',          icon: '🕊️', label: 'Widower' },
+                        { val: 'Awaiting Divorce', icon: '⏳', label: 'Awaiting Divorce' },
+                        { val: 'Others',           icon: '📝', label: 'Others' },
+                      ].map(({ val, icon, label }) => (
+                        <label
+                          key={val}
+                          className={`marital-pill ${formData.maritalStatus === val ? 'marital-pill-active' : ''}`}
+                        >
+                          <input
+                            type="radio"
+                            name="maritalStatus"
+                            value={val}
+                            checked={formData.maritalStatus === val}
+                            onChange={handleChange}
+                          />
+                          {icon} {label}
+                        </label>
+                      ))}
+                    </div>
                   </div>
+                  {/* Conditional: children info for non-first-marriage */}
+                  {formData.maritalStatus !== 'First Marriage' && (
+                    <>
+                      <div className="form-group">
+                        <label>No. of Children</label>
+                        <select name="noOfChildren" value={formData.noOfChildren} onChange={handleChange}>
+                          <option value="">Select</option>
+                          <option>No Children</option>
+                          <option>1 Child</option>
+                          <option>2 Children</option>
+                          <option>3 or more</option>
+                        </select>
+                      </div>
+                      {formData.noOfChildren && formData.noOfChildren !== 'No Children' && (
+                        <div className="form-group">
+                          <label>Children Living With</label>
+                          <select name="childrenLivingStatus" value={formData.childrenLivingStatus} onChange={handleChange}>
+                            <option value="">Select</option>
+                            <option>Living with me</option>
+                            <option>Living with ex-spouse</option>
+                            <option>Independently</option>
+                          </select>
+                        </div>
+                      )}
+                    </>
+                  )}
                   <div className="form-group">
                     <label>Mother Tongue</label>
                     <select name="motherTongue" value={formData.motherTongue} onChange={handleChange}>
@@ -252,7 +339,9 @@ const CreateProfile = () => {
               {step < 4 ? (
                 <button type="submit" className="btn-next">Next Step →</button>
               ) : (
-                <button type="submit" className="btn-submit">✅ Create Profile</button>
+                <button type="submit" className="btn-submit" disabled={loading}>
+                  {loading ? 'Creating...' : '✅ Create Profile'}
+                </button>
               )}
             </div>
             

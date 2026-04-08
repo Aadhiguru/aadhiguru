@@ -14,9 +14,9 @@ const testimonials = [
     id: 2,
     name: "Priya Rajan",
     location: "Kanchipuram",
-    text: "I was struggling with chronic back pain for years. After just a few Acupuncture sessions at Sri AadhiGuru, I've seen remarkable improvement. Truly professional service.",
+    text: "I was struggling with chronic back pain for years. After just a few Acupuncture & Varma sessions at Sri AadhiGuru, I've seen remarkable improvement. Truly professional service.",
     rating: 5,
-    tag: "Acupuncture"
+    tag: "Acupuncture & Varma"
   },
   {
     id: 3,
@@ -30,9 +30,9 @@ const testimonials = [
     id: 4,
     name: "Meenakshi S.",
     location: "Chennai",
-    text: "My daughter's performance in Mathematics improved significantly through their tuition classes. The tutors are patient and highly knowledgeable.",
+    text: "My conversational skills improved significantly through their spoken language classes. The tutors are patient and highly knowledgeable.",
     rating: 5,
-    tag: "Education"
+    tag: "Spoken Languages"
   }
 ];
 

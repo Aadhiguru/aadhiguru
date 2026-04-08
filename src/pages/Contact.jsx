@@ -23,6 +23,7 @@ const Contact = () => {
                 <div className="method-content">
                   <h3>Call Us</h3>
                   <p>+91 9600 666 225</p>
+                  <p>+91 9551 532 751</p>
                   <p>Available Mon - Sat (9:00 AM - 7:00 PM)</p>
                 </div>
               </div>

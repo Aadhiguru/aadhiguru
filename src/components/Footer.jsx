@@ -19,21 +19,22 @@ const Footer = () => {
             <ul className="footer-links">
               <li><a href="#home">Home</a></li>
               <li><a href="#services">Services</a></li>
-              <li><a href="#appointment">Book Appointment</a></li>
               <li><a href="#contact">Contact Us</a></li>
             </ul>
           </div>
           <div className="footer-col">
-            <h4 className="footer-heading">Head Office</h4>
+            <h4 className="footer-heading">Contact Info</h4>
             <address className="footer-address">
               48/29, N Mada St, near masilamanieswarar temple,<br />
-              near EB office, Thirumullaivoyal,<br />
-              Chennai, Tamil Nadu 600062
+              Thirumullaivoyal, Chennai 600062<br /><br />
+              <strong>Phone:</strong> +91 9600 666 225<br />
+              <strong>Alt:</strong> +91 9551 532 751<br />
+              <strong>Email:</strong> aadhiguru.com@gmail.com
             </address>
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} AadhiGuru. Redesigned with a neat & clean approach.</p>
+          <p>&copy; {new Date().getFullYear()} AadhiGuru.</p>
         </div>
       </div>
     </footer>

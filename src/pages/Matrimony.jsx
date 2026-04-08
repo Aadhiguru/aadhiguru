@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { supabase } from '../supabaseClient';
 import './Matrimony.css';
 /* ══════════════════════════════════════════════════
    DATA
@@ -12,6 +13,7 @@ const allProfiles = [
     profession: 'Nurse', location: 'Chennai', income: '4-6 LPA',
     complexion: 'Wheatish', diet: 'Vegetarian', motherTongue: 'Tamil',
     fatherOcc: 'Business', motherOcc: 'Homemaker', siblings: '1 Sister',
+    maritalStatus: 'First Marriage',
     avatar: '👩', avatarBg: 'linear-gradient(135deg,#f8c6c6,#ffd6e0)',
     matchScore: 92, isPremium: true, isVerified: true, isOnline: true,
     joinedDaysAgo: 2,
@@ -25,6 +27,7 @@ const allProfiles = [
     profession: 'Teacher', location: 'Coimbatore', income: '3-5 LPA',
     complexion: 'Fair', diet: 'Vegetarian', motherTongue: 'Tamil',
     fatherOcc: 'Retired Govt', motherOcc: 'Teacher', siblings: '1 Brother',
+    maritalStatus: 'First Marriage',
     avatar: '👩', avatarBg: 'linear-gradient(135deg,#d4f1c8,#b8e6b0)',
     matchScore: 87, isPremium: true, isVerified: true, isOnline: false,
     joinedDaysAgo: 5,
@@ -38,6 +41,7 @@ const allProfiles = [
     profession: 'Software Engineer', location: 'Bangalore', income: '8-12 LPA',
     complexion: 'Wheatish', diet: 'Non-Vegetarian', motherTongue: 'Tamil',
     fatherOcc: 'Business', motherOcc: 'Homemaker', siblings: 'None',
+    maritalStatus: 'Divorced',
     avatar: '👩', avatarBg: 'linear-gradient(135deg,#c8d4f8,#b8c8f0)',
     matchScore: 78, isPremium: true, isVerified: false, isOnline: true,
     joinedDaysAgo: 1,
@@ -51,6 +55,7 @@ const allProfiles = [
     profession: 'Business Analyst', location: 'Madurai', income: '6-10 LPA',
     complexion: 'Dark', diet: 'Non-Vegetarian', motherTongue: 'Tamil',
     fatherOcc: 'Business', motherOcc: 'Business', siblings: '2 Brothers',
+    maritalStatus: 'Widow',
     avatar: '👩', avatarBg: 'linear-gradient(135deg,#fde8c6,#fdd5a0)',
     matchScore: 65, isPremium: true, isVerified: true, isOnline: false,
     joinedDaysAgo: 12,
@@ -64,6 +69,7 @@ const allProfiles = [
     profession: 'Accountant', location: 'Chennai', income: '3-4 LPA',
     complexion: 'Fair', diet: 'Vegetarian', motherTongue: 'Tamil',
     fatherOcc: 'Retired', motherOcc: 'Homemaker', siblings: '1 Sister',
+    maritalStatus: 'First Marriage',
     avatar: '👩', avatarBg: 'linear-gradient(135deg,#ffe4f0,#ffd0e8)',
     matchScore: 95, isPremium: false, isVerified: true, isOnline: true,
     joinedDaysAgo: 3,
@@ -77,6 +83,7 @@ const allProfiles = [
     profession: 'Engineer', location: 'Chennai', income: '6-8 LPA',
     complexion: 'Wheatish', diet: 'Non-Vegetarian', motherTongue: 'Tamil',
     fatherOcc: 'Business', motherOcc: 'Teacher', siblings: '1 Brother',
+    maritalStatus: 'First Marriage',
     avatar: '👨', avatarBg: 'linear-gradient(135deg,#c8e8f8,#b0d8f0)',
     matchScore: 91, isPremium: true, isVerified: true, isOnline: false,
     joinedDaysAgo: 7,
@@ -90,6 +97,7 @@ const allProfiles = [
     profession: 'Data Scientist', location: 'Hyderabad', income: '15+ LPA',
     complexion: 'Fair', diet: 'Vegetarian', motherTongue: 'Tamil',
     fatherOcc: 'Professor', motherOcc: 'Homemaker', siblings: '1 Sister',
+    maritalStatus: 'Second Marriage',
     avatar: '👨', avatarBg: 'linear-gradient(135deg,#d8c8f8,#c8b8f0)',
     matchScore: 72, isPremium: true, isVerified: true, isOnline: true,
     joinedDaysAgo: 20,
@@ -103,6 +111,7 @@ const allProfiles = [
     profession: 'Agri-Business', location: 'Erode', income: '4-6 LPA',
     complexion: 'Wheatish', diet: 'Non-Vegetarian', motherTongue: 'Tamil',
     fatherOcc: 'Farmer', motherOcc: 'Homemaker', siblings: '2 Sisters',
+    maritalStatus: 'Divorced',
     avatar: '👨', avatarBg: 'linear-gradient(135deg,#d0f0d8,#b8e8c0)',
     matchScore: 80, isPremium: false, isVerified: false, isOnline: false,
     joinedDaysAgo: 4,
@@ -119,6 +128,18 @@ const incomes = ['All', '0-3 LPA', '3-5 LPA', '4-6 LPA', '6-10 LPA', '8-12 LPA',
 const heights = ['All', "Below 5'", "5'0\"–5'2\"", "5'3\"–5'5\"", "5'6\"–5'8\"", "5'9\"–5'11\"", "6'+"];
 const complexions = ['All', 'Fair', 'Wheatish', 'Dark'];
 const diets = ['All', 'Vegetarian', 'Non-Vegetarian'];
+const maritalStatuses = ['All', 'First Marriage', 'Second Marriage', 'Divorced', 'Widow', 'Widower', 'Awaiting Divorce', 'Others'];
+
+/* Marital status badge config */
+const maritalBadge = {
+  'First Marriage':      { bg: 'rgba(16,185,129,0.12)',  color: '#065f46', icon: '💍' },
+  'Second Marriage':     { bg: 'rgba(245,158,11,0.12)',  color: '#92400e', icon: '🔄' },
+  'Divorced':            { bg: 'rgba(239,68,68,0.10)',   color: '#991b1b', icon: '📋' },
+  'Widow':               { bg: 'rgba(100,116,139,0.12)', color: '#334155', icon: '🕊️' },
+  'Widower':             { bg: 'rgba(100,116,139,0.12)', color: '#334155', icon: '🕊️' },
+  'Awaiting Divorce':    { bg: 'rgba(168,85,247,0.10)',  color: '#6b21a8', icon: '⏳' },
+  'Others':              { bg: 'rgba(156,163,175,0.12)', color: '#374151', icon: '📝' },
+};
 
 function computeMatch(userProfile, profile) {
   let score = 0;
@@ -408,6 +429,14 @@ const ProfileCard = ({ profile, onViewFull, unlockedIds, shortlisted, onShortlis
           <span className="chip chip-blue">⭐ {profile.star}</span>
           <span className="chip chip-orange">🎓 {profile.education.split(' ').slice(-1)[0]}</span>
           <span className="chip chip-purple">💼 {profile.profession}</span>
+          {profile.maritalStatus && (() => {
+            const mb = maritalBadge[profile.maritalStatus] || { bg: 'rgba(156,163,175,0.12)', color: '#374151', icon: '📝' };
+            return (
+              <span className="chip chip-marital" style={{ background: mb.bg, color: mb.color }}>
+                {mb.icon} {profile.maritalStatus}
+              </span>
+            );
+          })()}
         </div>
 
         <div className="pcard-details-grid">
@@ -468,6 +497,7 @@ const Matrimony = () => {
   const [filters, setFilters] = useState({
     religion: 'All', caste: 'All', star: 'All', rasi: 'All',
     income: 'All', height: 'All', complexion: 'All', diet: 'All',
+    maritalStatus: 'All',
     minAge: 20, maxAge: 40, gender: 'female',
   });
   const [activeTab, setActiveTab] = useState('all');
@@ -475,10 +505,38 @@ const Matrimony = () => {
   const [unlockedIds, setUnlockedIds] = useState([5, 8]);
   const [shortlisted, setShortlisted] = useState([]);
   const [showUserForm, setShowUserForm] = useState(!isCreated);
+  const [profilesList, setProfilesList] = useState(allProfiles);
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      try {
+        const { data, error } = await supabase.from('matrimony_profiles').select('*');
+        if (!error && data && data.length > 0) {
+          const mapped = data.map(p => ({
+            ...p,
+            subCaste: p.sub_caste || p.subCaste,
+            motherTongue: p.mother_tongue || p.motherTongue,
+            fatherOcc: p.father_occ || p.fatherOcc,
+            motherOcc: p.mother_occ || p.motherOcc,
+            maritalStatus: p.marital_status || p.maritalStatus,
+            isPremium: p.is_premium || p.isPremium,
+            isVerified: p.is_verified || p.isVerified,
+            avatarBg: p.avatar_bg || p.avatarBg,
+            joinedDaysAgo: p.created_at ? Math.floor((new Date() - new Date(p.created_at)) / (86400 * 1000)) : 1
+          }));
+          // Set profiles prioritizing supabase results first, then defaults if any
+          setProfilesList([...mapped, ...allProfiles]);
+        }
+      } catch (err) {
+        console.error('Failed to fetch matrimony profiles', err);
+      }
+    };
+    fetchProfiles();
+  }, []);
 
   const oppositeGender = userProfile.gender === 'male' ? 'female' : 'male';
 
-  const baseProfiles = allProfiles
+  const baseProfiles = profilesList
     .filter(p => p.gender === (filters.gender || oppositeGender))
     .filter(p => filters.religion === 'All' || p.religion === filters.religion)
     .filter(p => filters.caste === 'All' || p.caste === filters.caste)
@@ -487,6 +545,7 @@ const Matrimony = () => {
     .filter(p => filters.income === 'All' || p.income === filters.income)
     .filter(p => filters.complexion === 'All' || p.complexion === filters.complexion)
     .filter(p => filters.diet === 'All' || p.diet === filters.diet)
+    .filter(p => filters.maritalStatus === 'All' || p.maritalStatus === filters.maritalStatus)
     .filter(p => p.age >= filters.minAge && p.age <= filters.maxAge)
     .map(p => ({ ...p, matchScore: computeMatch(userProfile, p) }))
     .sort((a, b) => b.matchScore - a.matchScore);
@@ -504,6 +563,7 @@ const Matrimony = () => {
   const resetFilters = () => setFilters({
     religion: 'All', caste: 'All', star: 'All', rasi: 'All',
     income: 'All', height: 'All', complexion: 'All', diet: 'All',
+    maritalStatus: 'All',
     minAge: 20, maxAge: 40, gender: oppositeGender,
   });
 
@@ -526,6 +586,9 @@ const Matrimony = () => {
             </p>
             <h1 className="mp-hero-h1">Find Your Perfect<br /><span className="mp-hero-accent">Life Partner</span></h1>
             <p className="mp-hero-sub">Vedic Jathagam Matching · Verified Profiles · Trusted by 10,000+ Families</p>
+            <Link to="/matrimony/porutham" className="mp-porutham-cta">
+              🔮 Free Thirumana Porutham Checker | திருமண பொருத்தம் →
+            </Link>
           </div>
 
           {showUserForm ? (
@@ -604,6 +667,25 @@ const Matrimony = () => {
                   <span className="age-sep">—</span>
                   <input type="number" min="18" max="60" value={filters.maxAge} onChange={e => sf('maxAge', +e.target.value)} />
                   <span className="age-unit">yrs</span>
+                </div>
+              </FilterAccordion>
+
+              {/* Marital Status — Tamil matrimony style pill chips */}
+              <FilterAccordion label="Marital Status | திருமண நிலை">
+                <div className="ms-chip-group">
+                  {maritalStatuses.map(ms => {
+                    const badge = ms !== 'All' ? maritalBadge[ms] : null;
+                    return (
+                      <button
+                        key={ms}
+                        className={`ms-chip ${filters.maritalStatus === ms ? 'ms-chip-active' : ''}`}
+                        style={filters.maritalStatus === ms && badge ? { background: badge.bg, color: badge.color, borderColor: badge.color } : {}}
+                        onClick={() => sf('maritalStatus', ms)}
+                      >
+                        {badge ? `${badge.icon} ` : ''}{ms}
+                      </button>
+                    );
+                  })}
                 </div>
               </FilterAccordion>
 

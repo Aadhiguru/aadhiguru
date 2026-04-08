@@ -73,6 +73,26 @@
   display: flex;
   flex-direction: column;
   transition: var(--transition);
+  overflow: hidden;
+}
+
+.class-thumbnail {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-surface); /* placeholder color before loading */
+}
+
+.class-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.class-card:hover .class-thumbnail img {
+  transform: scale(1.08); /* Premium slow zoom effect */
 }
 
 .class-card:hover {
@@ -134,15 +154,16 @@
   box-shadow: none;
 }
 
-/* Modal Styling */
+/* Enhanced Modal Styling */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -150,55 +171,267 @@
 }
 
 .modal-content {
-  background-color: white;
+  background-color: #ffffff;
   padding: 2.5rem;
-  border-radius: var(--radius-xl);
-  width: 100%;
-  max-width: 500px;
-  box-shadow: var(--shadow-lg);
+  border-radius: 20px;
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
 }
 
-.modal-content h3 {
+:root[data-theme="dark"] .modal-content,
+html.dark .modal-content {
+  background-color: #1e1e1e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.modal-header h3 {
   font-size: 1.5rem;
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 800;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  line-height: 1;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.close-btn:hover {
+  background-color: rgba(0,0,0,0.05);
+  color: var(--color-text);
+}
+
+:root[data-theme="dark"] .close-btn:hover,
+html.dark .close-btn:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.order-summary {
+  background-color: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  border: 1px solid var(--color-border);
+}
+
+:root[data-theme="dark"] .order-summary,
+html.dark .order-summary {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.summary-label {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.summary-title {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
   margin-bottom: 1rem;
 }
 
-.price-tag {
-  font-size: 1.5rem;
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px dashed var(--color-border);
+  padding-top: 1rem;
   font-weight: 700;
+  color: var(--color-text);
+}
+
+.price-value {
+  font-size: 1.5rem;
   color: var(--color-primary);
-  margin: 1.5rem 0;
 }
 
 .payment-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.input-group label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
 }
 
 .payment-form input {
+  width: 100%;
+  box-sizing: border-box;
   padding: 0.875rem 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
   font-family: inherit;
   font-size: 1rem;
+  background-color: transparent;
+  color: var(--color-text);
+  transition: all 0.2s ease;
+}
+
+.payment-form input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(243, 141, 62, 0.1);
 }
 
 .payment-form .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  align-items: start;
 }
 
 .modal-actions {
-  display: flex;
-  justify-content: flex-end;
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
   gap: 1rem;
 }
 
+.cancel-btn {
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: 10px;
+  padding: 1rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  cursor: pointer;
+  text-align: center;
+}
+
+.cancel-btn:hover {
+  background-color: rgba(0,0,0,0.05);
+}
+
+:root[data-theme="dark"] .cancel-btn:hover,
+html.dark .cancel-btn:hover {
+  background-color: rgba(255,255,255,0.05);
+}
+
+.pay-btn {
+  background: linear-gradient(135deg, var(--color-primary), #ff6b6b);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 8px 16px rgba(243, 141, 62, 0.25);
+  transition: all 0.3s ease;
+}
+
+.pay-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(243, 141, 62, 0.35);
+  background: linear-gradient(135deg, #ff6b6b, var(--color-primary));
+}
+
+.fade-in {
+  animation: fadeInModalBg 0.3s ease forwards;
+}
+
+.scale-up {
+  animation: scaleUpContent 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInModalBg {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUpContent {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@media (max-width: 900px) {
+  .classes-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .classes-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.5rem;
+  }
+}
+
 @media (max-width: 600px) {
+  .classes-grid {
+    grid-template-columns: 1fr;
+  }
   .admin-form .form-row {
     grid-template-columns: 1fr;
   }
+  .modal-content {
+    padding: 1.5rem;
+  }
+  .modal-header h3 {
+    font-size: 1.25rem;
+  }
+  .class-thumbnail {
+    height: 180px;
+  }
+  .payment-form .form-row {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  
+  .modal-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .cancel-btn {
+    order: 2;
+  }
+  
+  .pay-btn {
+    order: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .class-title-en { font-size: 1.15rem; }
+  .class-content { padding: 1.5rem; }
 }

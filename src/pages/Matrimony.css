@@ -92,6 +92,37 @@
   line-height: 1.7;
 }
 
+.mp-porutham-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding: 0.65rem 1.4rem;
+  background: rgba(243,141,62,0.15);
+  border: 1.5px solid rgba(243,141,62,0.4);
+  border-radius: var(--radius-full);
+  color: #f59e0b;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+.mp-porutham-cta:hover {
+  background: rgba(243,141,62,0.25);
+  border-color: rgba(243,141,62,0.7);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(243,141,62,0.25);
+  color: #fbbf24;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(243,141,62,0); }
+  50%       { box-shadow: 0 0 12px 3px rgba(243,141,62,0.2); }
+}
+
 /* ── Search Card ── */
 .mp-search-card {
   background: rgba(255,255,255,0.97);
@@ -812,6 +843,52 @@
   transition: all 0.2s;
 }
 .mp-empty-reset:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(31,138,112,0.3); }
+
+/* ══════════════════════════════════════════════════
+   MARITAL STATUS FILTER CHIPS (Tamil Matrimony Style)
+   ══════════════════════════════════════════════════ */
+.ms-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.ms-chip {
+  padding: 0.32rem 0.72rem;
+  border-radius: 50px;
+  border: 1.5px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.ms-chip:hover {
+  border-color: #9ca3af;
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.ms-chip-active {
+  border-color: var(--color-primary) !important;
+  background: rgba(31,138,112,0.09) !important;
+  color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(31,138,112,0.12);
+}
+
+/* Profile card — marital status badge chip */
+.chip-marital {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  box-shadow: inset 0 0 0 1px currentColor;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
 
 /* ══════════════════════════════════════════════════
    MODALS

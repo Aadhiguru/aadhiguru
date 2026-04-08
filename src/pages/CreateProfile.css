@@ -257,3 +257,84 @@
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
+
+/* ── Marital Status Pill Selector (Tamil Matrimony Style) ── */
+.marital-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.25rem;
+}
+
+.marital-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.52rem 1rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: 50px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #4b5563;
+  background: var(--color-bg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.marital-pill input {
+  display: none;
+}
+
+.marital-pill:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(31, 138, 112, 0.05);
+}
+
+.marital-pill-active {
+  border-color: var(--color-primary) !important;
+  background: rgba(31, 138, 112, 0.10) !important;
+  color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(31, 138, 112, 0.12);
+}
+
+/* Special active colors per status */
+.marital-pill-active[data-status="Divorced"] {
+  border-color: #dc2626 !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+  color: #991b1b !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.10);
+}
+.marital-pill-active[data-status="Widow"],
+.marital-pill-active[data-status="Widower"] {
+  border-color: #475569 !important;
+  background: rgba(100, 116, 139, 0.10) !important;
+  color: #334155 !important;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.12);
+}
+.marital-pill-active[data-status="Second Marriage"] {
+  border-color: #d97706 !important;
+  background: rgba(245, 158, 11, 0.09) !important;
+  color: #92400e !important;
+}
+
+/* Conditional children note box */
+.children-info-box {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, rgba(245,158,11,0.07), rgba(239,68,68,0.05));
+  border: 1.5px solid rgba(245,158,11,0.25);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.children-info-box .children-note {
+  font-size: 0.8rem;
+  color: #92400e;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  margin-bottom: 0.5rem;
+}

@@ -1,12 +1,75 @@
+import { useState } from 'react';
+import { supabase } from '../supabaseClient';
 import './AppointmentForm.css';
+import SuccessModal from './SuccessModal';
 
 const AppointmentForm = () => {
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phone: '',
+    email: '',
+    date: '',
+    purpose: '',
+    notes: ''
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name) {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    } else {
+      // For the select or date if they don't have name (I will add names)
+      setFormData(prev => ({ ...prev, [e.target.dataset.name]: value }));
+    }
+  };
+
+  const handleBooking = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .insert([{
+          full_name: formData.fullName,
+          gender: 'Not Specified', // Default as it's not in the form
+          phone_number: formData.phone,
+          calling_location: 'Web Inquiry', // Default
+          meeting_location: 'Online/In-person', // Default
+          purpose_of_booking: formData.purpose,
+          date: formData.date,
+          time_slot: 'To be confirmed', // Default
+          status: 'pending',
+          payment_status: 'unpaid'
+        }]);
+
+      if (error) throw error;
+      
+      setShowSuccess(true);
+      // Reset form
+      setFormData({
+        fullName: '',
+        phone: '',
+        email: '',
+        date: '',
+        purpose: '',
+        notes: ''
+      });
+    } catch (error) {
+      console.error('Error saving booking:', error);
+      alert('Error saving booking: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section id="appointment" className="section">
       <div className="container">
         <div className="appointment-wrapper">
           <div className="appointment-info">
-            <h2 className="section-title" style={{ textAlign: 'left', color: 'white', marginBottom: '1.5rem' }}>Book Your Consultation</h2>
             <p className="appointment-desc">
               Schedule an in-person or online session with our expert astrologers. Gain profound insights into your health, wealth, and future path.
             </p>
@@ -29,24 +92,24 @@ const AppointmentForm = () => {
           <div className="appointment-form-box">
             <h3 className="form-title">Request a Callback</h3>
             <p className="form-subtitle">Fill in your details and our team will get back to you shortly.</p>
-            <form className="form">
+            <form className="form" onSubmit={handleBooking}>
               <div className="form-group">
-                <input type="text" placeholder="Full Name *" required />
+                <input type="text" name="fullName" placeholder="Full Name *" required value={formData.fullName} onChange={handleChange} />
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <input type="tel" placeholder="Phone Number *" required />
+                  <input type="tel" name="phone" placeholder="Phone Number *" required value={formData.phone} onChange={handleChange} />
                 </div>
                 <div className="form-group">
-                  <input type="email" placeholder="Email Address" />
+                  <input type="email" name="email" placeholder="Email Address" value={formData.email} onChange={handleChange} />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <input type="date" required />
+                  <input type="date" name="date" required value={formData.date} onChange={handleChange} />
                 </div>
                 <div className="form-group">
-                  <select defaultValue="" required>
+                  <select name="purpose" required value={formData.purpose} onChange={handleChange}>
                     <option value="" disabled>Select Purpose *</option>
                     <option value="vastu">Vastu Consultation</option>
                     <option value="astrology">Traditional Astrology</option>
@@ -57,15 +120,23 @@ const AppointmentForm = () => {
                 </div>
               </div>
               <div className="form-group">
-                <textarea placeholder="Description / Notes" rows="4"></textarea>
+                <textarea name="notes" placeholder="Description / Notes" rows="4" value={formData.notes} onChange={handleChange}></textarea>
               </div>
-              <button type="button" className="btn btn-primary w-100" style={{ padding: '1.25rem', marginTop: '1rem', borderRadius: 'var(--radius-full)' }} onClick={() => alert('Booking flow would start here!')}>
-                Reserve Appointment Now
+              <button type="submit" className="btn btn-primary w-100" disabled={loading} style={{ padding: '1.25rem', marginTop: '1rem', borderRadius: 'var(--radius-full)' }}>
+                {loading ? 'Reserving...' : 'Reserve Appointment Now'}
               </button>
             </form>
           </div>
         </div>
       </div>
+      
+      <SuccessModal 
+        isOpen={showSuccess}
+        onClose={() => setShowSuccess(false)}
+        title="Request Received!"
+        message="Thank you for booking an appointment. Our team will contact you shortly to confirm your slot."
+        actionText="Done"
+      />
     </section>
   );
 };
