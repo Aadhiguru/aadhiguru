@@ -59,7 +59,7 @@
 }
 
 .footer-links a:hover {
-  color: var(--color-secondary);
+  color: var(--color-primary);
   transform: translateX(5px);
 }
 

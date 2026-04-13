@@ -135,21 +135,22 @@
 }
 
 .login-submit-btn {
-  background-color: var(--color-primary);
+  background: var(--gradient-primary);
   color: white;
-  padding: 0.9rem;
+  padding: 1rem;
   border-radius: var(--radius-full);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: var(--transition);
   margin-top: 0.5rem;
+  box-shadow: 0 4px 12px rgba(31, 138, 112, 0.2);
 }
 
 .login-submit-btn:hover {
-  background-color: var(--color-primary-hover);
+  background: linear-gradient(135deg, #166854 0%, #0f4d3e 100%);
   transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(31, 138, 112, 0.3);
+  box-shadow: 0 8px 20px rgba(31, 138, 112, 0.3);
 }
 
 .divider {
@@ -218,4 +219,117 @@
   }
 }
 
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
 
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 2.5rem;
+}
+
+.eye-btn {
+  position: absolute;
+  right: 0.75rem;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.eye-btn:hover {
+  color: var(--color-primary);
+}
+
+.password-requirements {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.req-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: color 0.2s ease;
+}
+
+.req-item.met {
+  color: #34A853;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+.custom-notification {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.2rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  animation: fadeIn 0.3s ease;
+  position: relative;
+}
+
+.custom-notification.error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.custom-notification.success {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+}
+
+.notif-icon {
+  font-size: 1.25rem;
+}
+
+.notif-text {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.notif-close {
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+}
+
+.notif-close:hover {
+  opacity: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

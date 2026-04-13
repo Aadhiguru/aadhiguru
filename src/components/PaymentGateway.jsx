@@ -1,217 +1,143 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 import './PaymentGateway.css';
 
 const PaymentGateway = ({ amount, onPaymentSuccess, onClose, customerName, customerPhone }) => {
-  const [activeTab, setActiveTab] = useState('card'); // 'card' or 'upi'
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  
-  // Card States
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvv, setCvv] = useState('');
-  const [cardName, setCardName] = useState(customerName || '');
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [errorStatus, setErrorStatus] = useState(null);
 
-  // UPI States
-  const [upiId, setUpiId] = useState('');
+  useEffect(() => {
+    // 1. Load the Razorpay SDK Script dynamically
+    const loadScript = (src) => {
+      return new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+      });
+    };
 
-  const formatCardNumber = (value) => {
-    const val = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    const matches = val.match(/\d{4,16}/g);
-    const match = (matches && matches[0]) || '';
-    const parts = [];
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4));
-    }
-    if (parts.length) {
-      return parts.join(' ');
-    } else {
-      return val;
-    }
-  };
+    const displayRazorpay = async () => {
+      try {
+        setErrorStatus(null);
+        setIsProcessing(true);
+        
+        const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
+        if (!res) {
+          setErrorStatus('Failed to load Razorpay SDK. Please check your internet connection.');
+          setIsProcessing(false);
+          return;
+        }
 
-  const handleCardNumberChange = (e) => {
-    const formatted = formatCardNumber(e.target.value);
-    if (formatted.length <= 19) setCardNumber(formatted);
-  };
+        // 2. Call Edge Function to create order
+        const { data: orderData, error: orderError } = await supabase.functions.invoke('create-razorpay-order', {
+          body: { amount: amount * 100 } // Send amount in Paise (e.g. 9 * 100 = 900)
+        });
 
-  const handleExpiryChange = (e) => {
-    let val = e.target.value.replace(/[^0-9]/g, '');
-    if (val.length >= 2) {
-      val = val.substring(0, 2) + '/' + val.substring(2, 4);
-    }
-    if (val.length <= 5) setExpiry(val);
-  };
+        if (orderError) throw orderError;
+        if (!orderData || !orderData.id) throw new Error('Order ID not returned from server. Check Edge Function logs.');
 
-  const handlePay = (e) => {
-    e.preventDefault();
-    setIsProcessing(true);
+        // 3. Configure Razorpay Display Options
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: amount * 100,
+          currency: 'INR',
+          name: 'Sri AadhiGuru Education',
+          description: 'Payment for services',
+          order_id: orderData.id,
+          handler: async function (response) {
+            try {
+               setIsProcessing(true); // show loading spinner again while verifying
+               // 4. Verify Payment with second Edge Function
+               const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-razorpay-payment', {
+                 body: {
+                   razorpay_order_id: response.razorpay_order_id,
+                   razorpay_payment_id: response.razorpay_payment_id,
+                   razorpay_signature: response.razorpay_signature,
+                 }
+               });
+               
+               if (verifyError) throw verifyError;
+               
+               if (verifyData && verifyData.success) {
+                 document.body.style.overflow = ''; // Force fix Razorpay frozen scroll
+                 onPaymentSuccess();
+               } else {
+                 document.body.style.overflow = '';
+                 alert('Payment verification failed on the server.');
+                 onClose();
+               }
+            } catch (err) {
+               document.body.style.overflow = '';
+               console.error('Verification Error:', err);
+               alert('Your payment was captured, but verification failed locally. We will process this manually. Please contact support.');
+               onClose();
+            }
+          },
+          prefill: {
+            name: customerName || '',
+            contact: customerPhone || ''
+          },
+          theme: {
+            color: '#1f8a70'
+          },
+          modal: {
+            ondismiss: function() {
+              setIsProcessing(false);
+              onClose();
+            }
+          }
+        };
+
+        const paymentObject = new window.Razorpay(options);
+        paymentObject.open();
+        
+        paymentObject.on('payment.failed', function (response) {
+            console.error(response.error);
+            alert(`Payment Failed: ${response.error.description}`);
+            onClose();
+        });
+
+      } catch (err) {
+        console.error("Razorpay Checkout Error:", err);
+        setErrorStatus('Error generating payment request: ' + err.message);
+        setIsProcessing(false);
+      }
+    };
+
+    displayRazorpay();
     
-    // Simulate payment gateway delay
-    setTimeout(() => {
-      setIsProcessing(false);
-      setIsSuccess(true);
-      
-      // Notify parent after a short delay
-      setTimeout(() => {
-        onPaymentSuccess();
-      }, 2000);
-    }, 2500);
-  };
-
-  if (isSuccess) {
-    return (
-      <div className="payment-gateway-modal">
-        <div className="payment-container" style={{ textAlign: 'center' }}>
-          <div className="payment-success-content">
-            <div className="success-icon">✅</div>
-            <h2 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '0.5rem', color: '#16a34a' }}>Payment Successful!</h2>
-            <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>Transaction ID: #PX-{Math.floor(Math.random() * 10000000)}</p>
-            <div style={{ background: 'rgba(0,0,0,0.05)', padding: '1rem', borderRadius: '12px', width: '100%' }}>
-              <p style={{ fontWeight: '600' }}>Amount Paid: ₹{amount.toLocaleString('en-IN')}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+    // Explicit cleanup to ensure scrolling is never frozen if component unmounts abruptly
+    return () => {
+      document.body.style.overflow = '';
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   return (
-    <div className="payment-gateway-modal">
-      <div className="payment-container">
-        <div className="payment-header">
-          <h3>Secure Payment Gateway</h3>
-          <button className="close-btn" onClick={onClose}>&times;</button>
-        </div>
-
-        <div className="payment-body">
-          <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Total Amount to Pay</p>
-            <h2 style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--color-text)' }}>₹{amount.toLocaleString('en-IN')}</h2>
-          </div>
-
-          <div className="payment-tabs">
-            <button 
-              className={`tab-btn ${activeTab === 'card' ? 'active' : ''}`}
-              onClick={() => setActiveTab('card')}
-            >
-              💳 Card (Credit/Debit)
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'upi' ? 'active' : ''}`}
-              onClick={() => setActiveTab('upi')}
-            >
-              📱 UPI / QR Code
-            </button>
-          </div>
-
-          <form className="payment-form" onSubmit={handlePay}>
-            {activeTab === 'card' ? (
-              <>
-                <div className="form-group">
-                  <label>Cardholder Name</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">👤</span>
-                    <input 
-                      type="text" 
-                      placeholder="Name as on card" 
-                      required 
-                      value={cardName}
-                      onChange={(e) => setCardName(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label>Card Number</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">💳</span>
-                    <input 
-                      type="text" 
-                      placeholder="0000 0000 0000 0000" 
-                      required 
-                      value={cardNumber}
-                      onChange={handleCardNumberChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Expiry Date</label>
-                    <div className="input-wrapper">
-                      <span className="input-icon">📅</span>
-                      <input 
-                        type="text" 
-                        placeholder="MM/YY" 
-                        required 
-                        value={expiry}
-                        onChange={handleExpiryChange}
-                      />
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label>CVV</label>
-                    <div className="input-wrapper">
-                      <span className="input-icon">🔒</span>
-                      <input 
-                        type="password" 
-                        placeholder="***" 
-                        maxLength="3" 
-                        required 
-                        value={cvv}
-                        onChange={(e) => setCvv(e.target.value.replace(/[^0-9]/g, ''))}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="upi-info">
-                <div className="form-group">
-                  <label>Pay using UPI ID (VPA)</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">⚡</span>
-                    <input 
-                      type="text" 
-                      className="vpa-input"
-                      placeholder="username@bankid" 
-                      required 
-                      value={upiId}
-                      onChange={(e) => setUpiId(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ margin: '1rem 0', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
-                  — OR —
-                </div>
-
-                <div className="qr-code-placeholder">
-                   <img src="/src/assets/upi_qr.png" alt="Scan to Pay" style={{ borderRadius: '8px' }} />
-                   <div style={{ position: 'absolute', bottom: '0.5rem', background: 'white', padding: '0 0.5rem', fontSize: '0.7rem', color: '#666', fontWeight: '700' }}>
-                     SCAN & PAY
-                   </div>
-                </div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Scan this QR using any UPI app like GPay, PhonePe, or Paytm</p>
-              </div>
-            )}
-
-            <button 
-              type="submit" 
-              className="pay-submit-btn" 
-              disabled={isProcessing}
-            >
-              {isProcessing ? '🔄 Processing Securely...' : `Pay ₹${amount.toLocaleString('en-IN')} Securely`}
-            </button>
-
-            <div style={{ textAlign: 'center', marginTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-               <span>🔒 PCI DSS Compliant</span>
-               <span>•</span>
-               <span>256-bit SSL Encryption</span>
-            </div>
-          </form>
-        </div>
+    <div className="payment-gateway-modal" style={{ zIndex: 9999 }}>
+      <div className="payment-container" style={{ textAlign: 'center', padding: '3rem', position: 'relative' }}>
+        {errorStatus && (
+          <button className="close-btn" onClick={onClose} style={{ position: 'absolute', top: '15px', right: '20px', background: 'transparent', border: 'none', fontSize: '2rem', cursor: 'pointer', color: '#666' }}>&times;</button>
+        )}
+        
+        {isProcessing ? (
+           <>
+             <div className="ps-spinner" style={{ margin: '0 auto 1.5rem auto', width: '50px', height: '50px', borderTopColor: '#1f8a70' }}></div>
+             <h2 style={{ fontSize: '1.4rem', color: '#1f8a70', fontWeight: 'bold' }}>Securing Checkout Session</h2>
+             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginTop: '0.5rem' }}>Do not press back or refresh the page.</p>
+           </>
+        ) : errorStatus ? (
+           <>
+             <div style={{ fontSize: '3rem', margin: '0 auto 1.5rem auto' }}>⚠️</div>
+             <h2 style={{ fontSize: '1.5rem', color: '#ef4444', fontWeight: 'bold' }}>Initialization Failed</h2>
+             <p style={{ color: 'var(--color-text-muted)', margin: '1rem 0' }}>{errorStatus}</p>
+             <button onClick={onClose} style={{ marginTop: '1rem', padding: '0.8rem 1.5rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Go Back</button>
+           </>
+        ) : (
+           <p style={{ color: '#666' }}>Payment window is open. Please complete your transaction.</p>
+        )}
       </div>
     </div>
   );

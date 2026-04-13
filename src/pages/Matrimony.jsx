@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import PaymentGateway from '../components/PaymentGateway';
 import './Matrimony.css';
 /* ══════════════════════════════════════════════════
    DATA
@@ -196,8 +197,27 @@ const PayModal = ({ profile, onClose, onPay }) => {
 
   const handlePay = () => {
     setStep('paying');
-    setTimeout(() => { setStep('done'); setTimeout(() => { onPay(profile.id); onClose(); }, 1600); }, 2200);
   };
+
+  const handlePaymentSuccess = () => {
+    setStep('done');
+    // Save to local state and close modal
+    setTimeout(() => { 
+      onPay(profile.id); 
+      onClose(); 
+    }, 2000);
+  };
+
+  if (step === 'paying') {
+    return (
+      <PaymentGateway
+        amount={chosen.price}
+        customerName="Matrimony User"
+        onClose={() => setStep('plan')}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
+    );
+  }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -207,14 +227,8 @@ const PayModal = ({ profile, onClose, onPay }) => {
         {step === 'done' ? (
           <div className="pay-done">
             <div className="pay-done-anim">✅</div>
-            <h3>Profile Unlocked!</h3>
+            <h3>Payment Received! Profile Unlocked.</h3>
             <p>Opening full profile of <strong>{profile.name}</strong>…</p>
-          </div>
-        ) : step === 'paying' ? (
-          <div className="pay-processing">
-            <div className="pay-spinner-lg"></div>
-            <h3>Processing Payment…</h3>
-            <p>Please wait, do not close this window.</p>
           </div>
         ) : (
           <>

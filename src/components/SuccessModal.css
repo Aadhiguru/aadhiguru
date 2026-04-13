@@ -104,23 +104,23 @@
 }
 
 .success-action-btn {
-  background: linear-gradient(135deg, var(--color-primary), #ff6b6b);
+  background: var(--gradient-primary);
   color: white;
   border: none;
   width: 100%;
   padding: 1rem;
   border-radius: 12px;
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 15px rgba(243, 141, 62, 0.2);
+  box-shadow: 0 8px 15px rgba(31, 138, 112, 0.2);
 }
 
 .success-action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 20px rgba(243, 141, 62, 0.3);
-  background: linear-gradient(135deg, #ff6b6b, var(--color-primary));
+  box-shadow: 0 12px 20px rgba(31, 138, 112, 0.3);
+  background: linear-gradient(135deg, #166854 0%, #0f4d3e 100%);
 }
 
 /* Animations */

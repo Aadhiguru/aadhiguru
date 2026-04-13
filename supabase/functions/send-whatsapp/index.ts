@@ -1,90 +1,82 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
-const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
-const TWILIO_PHONE_NUMBER = Deno.env.get("TWILIO_PHONE_NUMBER"); // e.g. "whatsapp:+14155238886"
-const ADMIN_PHONE_NUMBER = Deno.env.get("ADMIN_PHONE_NUMBER"); // e.g. "whatsapp:+919600666225"
-const SITE_URL = Deno.env.get("SITE_URL") || "https://yourdomain.com";
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
-// @ts-ignore - Supabase Edge Functions environment
-serve(async (req: any) => {
+Deno.serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   try {
-    const payload = await req.json();
-    console.log("Webhook payload:", payload);
+    const { action, bookingDetails, userPhone } = await req.json();
 
-    if (payload.type === "INSERT" && payload.table === "bookings") {
-      const record = payload.record;
-      const messageBody = `*New Booking Request:*
-Name: ${record.full_name}
-Phone: ${record.phone_number}
-Gender: ${record.gender}
-Service: ${record.purpose_of_booking}
-Date: ${record.date}
-Time: ${record.time_slot}
-Location: ${record.meeting_location}
+    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
+    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
+    const twilioNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
+    const adminPhone = Deno.env.get('ADMIN_PHONE') || '+917305801121';
 
-Accept: ${SITE_URL}/accept?id=${record.id}
-Reject: ${SITE_URL}/reject?id=${record.id}`;
-
-      await sendTwilioMessage(ADMIN_PHONE_NUMBER, messageBody);
-      return new Response(JSON.stringify({ success: true, message: "Admin notified" }), { headers: { "Content-Type": "application/json" } });
-    }
-    
-    // Check if it's an UPDATE for status
-    if (payload.type === "UPDATE" && payload.table === "bookings") {
-      const oldRecord = payload.old_record;
-      const newRecord = payload.record;
-      
-      if (oldRecord.status === "pending" && newRecord.status === "accepted") {
-        const userPhone = formatPhone(newRecord.phone_number);
-        const msg = `*AadhiGuru*: Hello ${newRecord.full_name}, your booking for ${newRecord.purpose_of_booking} on ${newRecord.date} has been accepted! Please visit ${SITE_URL}/pay?id=${newRecord.id} to securely complete your payment.`;
-        await sendTwilioMessage(userPhone, msg);
-      } else if (oldRecord.status === "pending" && newRecord.status === "rejected") {
-        const userPhone = formatPhone(newRecord.phone_number);
-        const msg = `*AadhiGuru*: Hello ${newRecord.full_name}, sorry to inform you that your booking request for ${newRecord.purpose_of_booking} on ${newRecord.date} cannot be accommodated at this time. Please contact us for alternate slots.`;
-        await sendTwilioMessage(userPhone, msg);
-      }
-      return new Response(JSON.stringify({ success: true, message: "Status handled" }), { headers: { "Content-Type": "application/json" } });
+    if (!accountSid || !authToken || !twilioNumber) {
+      throw new Error('Twilio credentials completely missing in environment variables');
     }
 
-    return new Response(JSON.stringify({ success: true, message: "Ignored" }), { headers: { "Content-Type": "application/json" } });
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { "Content-Type": "application/json" } });
+    const authHeader = `Basic ${btoa(`${accountSid}:${authToken}`)}`;
+    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+
+    let toPhone = '';
+    let message = '';
+
+    if (action === 'notify-admin') {
+      // Send Alert to Admin/Author
+      toPhone = adminPhone;
+      const timeStr = bookingDetails.time || 'To be confirmed';
+      message = `🔔 *New Appointment Request*\n\n*Service:* ${bookingDetails.serviceName}\n*Client:* ${bookingDetails.userName}\n*Date:* ${bookingDetails.date}\n*Time:* ${timeStr}\n\n*Action Required:*\nReply with the word *ACCEPT* to instantly approve this booking!`;
+    } else if (action === 'notify-user') {
+      // Send Approval Alert to User
+      toPhone = userPhone;
+      message = `✅ *Appointment Approved!*\n\nHi ${bookingDetails.userName}, your booking for *${bookingDetails.serviceName}* on ${bookingDetails.date} at ${bookingDetails.time} has been confirmed securely by Sri AadhiGuru.\n\nPlease arrive on time. Thank you!`;
+    } else {
+      throw new Error('Invalid action provided to Twilio edge function');
+    }
+
+    // Format phone numbers for WhatsApp (ensure it has whatsapp: prefix and country code)
+    if (!toPhone.startsWith('+')) {
+      toPhone = '+91' + toPhone; // Default to India if no code provided
+    }
+
+    const payload = new URLSearchParams();
+    payload.append('To', `whatsapp:${toPhone}`);
+    payload.append('From', `whatsapp:${twilioNumber}`);
+    payload.append('Body', message);
+
+    const twilioResponse = await fetch(twilioUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: payload,
+    });
+
+    const twilioData = await twilioResponse.json();
+
+    if (!twilioResponse.ok) {
+      console.error('Twilio Error:', twilioData);
+      throw new Error(`Twilio rejected the message: ${twilioData.message}`);
+    }
+
+    return new Response(JSON.stringify({ success: true, messageId: twilioData.sid }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
+    });
+  } catch (error) {
+    console.error('Edge Function Error:', error.message);
+    return new Response(JSON.stringify({ success: false, error: error.message }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500,
+    });
   }
 });
-
-function formatPhone(phone: string) {
-  const p = phone.replace(/[^0-9]/g, '');
-  if (p.length === 10) return `whatsapp:+91${p}`;
-  return `whatsapp:+${p}`;
-}
-
-async function sendTwilioMessage(to: string, body: string) {
-  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN) {
-    console.error("Twilio credentials missing!");
-    return;
-  }
-  
-  const token = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
-  
-  const formData = new URLSearchParams();
-  formData.append("To", to);
-  formData.append("From", TWILIO_PHONE_NUMBER!);
-  formData.append("Body", body);
-
-  const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Basic ${token}`,
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: formData.toString()
-  });
-  
-  if (!res.ok) {
-    const err = await res.text();
-    console.error("Twilio Error:", err);
-  } else {
-    console.log("Message sent to", to);
-  }
-}

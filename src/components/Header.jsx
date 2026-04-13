@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { supabase } from '../supabaseClient';
+import './Header.css';
 import './Header.css';
 
 const NAV_LINKS = [
@@ -15,6 +17,19 @@ const Header = () => {
   const location = useLocation();
   const [menuOpen, setMenuOpen]   = useState(false);
   const [scrolled, setScrolled]   = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   /* Close mobile menu on route change */
   useEffect(() => { setMenuOpen(false); }, [location.pathname]);
@@ -70,10 +85,45 @@ const Header = () => {
                   </Link>
             ))}
 
-            <Link to="/login" className="nav-login-btn">
-              <span className="nav-btn-icon">👤</span>
-              Login / Sign Up
-            </Link>
+            {user ? (
+              <div className="nav-user-account profile-dropdown-container">
+                <div className="nav-login-btn logged-in profile-trigger">
+                  {user.user_metadata?.avatar_url ? (
+                    <img src={user.user_metadata.avatar_url} alt="Profile avatar" className="nav-profile-pic" />
+                  ) : (
+                    <span className="nav-btn-icon">👤</span>
+                  )}
+                  <span className="profile-name">
+                    {user.user_metadata?.full_name || user.user_metadata?.username || user.email?.split('@')[0] || 'My Account'}
+                  </span>
+                  <span className="dropdown-arrow">▼</span>
+                </div>
+                
+                <div className="profile-dropdown">
+                  <div className="dropdown-header">
+                    <p className="dropdown-email">{user.email}</p>
+                  </div>
+                  <Link to="/dashboard" className="dropdown-item">
+                    <span className="dropdown-icon">📋</span> My Bookings
+                  </Link>
+                  <Link to="/profile" className="dropdown-item">
+                    <span className="dropdown-icon">⚙️</span> Profile Settings
+                  </Link>
+                  <div className="dropdown-divider"></div>
+                  <button 
+                    onClick={() => supabase.auth.signOut()} 
+                    className="dropdown-item logout-item"
+                  >
+                    <span className="dropdown-icon">🚪</span> Sign Out
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <Link to="/login" className="nav-login-btn">
+                <span className="nav-btn-icon">👤</span>
+                Login / Sign Up
+              </Link>
+            )}
           </nav>
 
           {/* ── Hamburger ── */}
@@ -124,9 +174,35 @@ const Header = () => {
         </nav>
 
         <div className="drawer-footer">
-          <Link to="/login" className="drawer-login-btn" onClick={() => setMenuOpen(false)}>
-            👤 Login / Sign Up
-          </Link>
+          {user ? (
+            <div style={{display: 'flex', gap: '10px', flexDirection: 'column'}}>
+              <div className="drawer-user-info">
+                {user.user_metadata?.avatar_url ? (
+                  <img src={user.user_metadata.avatar_url} alt="Profile" className="drawer-profile-pic" />
+                ) : (
+                  <span className="drawer-profile-icon">👤</span>
+                )}
+                <div className="drawer-user-details">
+                  <span className="drawer-user-name">{user.user_metadata?.full_name || user.user_metadata?.username || user.email?.split('@')[0]}</span>
+                  <span className="drawer-user-email">{user.email}</span>
+                </div>
+              </div>
+              <Link to="/dashboard" className="drawer-link" onClick={() => setMenuOpen(false)}>
+                 <span className="drawer-link-icon">📋</span> My Bookings
+              </Link>
+              <button 
+                onClick={() => { supabase.auth.signOut(); setMenuOpen(false); }} 
+                className="drawer-link" 
+                style={{color: '#ef4444', border: 'none', background: 'transparent', textAlign: 'left', padding: '0.85rem 1.1rem', cursor: 'pointer', fontFamily: 'inherit'}}
+              >
+                <span className="drawer-link-icon">🚪</span> Sign Out
+              </button>
+            </div>
+          ) : (
+            <Link to="/login" className="drawer-login-btn" onClick={() => setMenuOpen(false)}>
+              👤 Login / Sign Up
+            </Link>
+          )}
           <p className="drawer-tagline">🕉️ Vedic · Authentic · Trusted</p>
         </div>
       </div>

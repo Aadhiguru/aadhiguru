@@ -4,13 +4,25 @@ import SuccessModal from '../components/SuccessModal';
 
 const initialClasses = [
   { id: 1, title_en: "Introduction to Vastu Shastra", title_ta: "வாஸ்து சாஸ்திரம் அறிமுகம்", date: "2026-04-10", price: 1500, attendees: 12, thumbnail: "/vastu_thumbnail.png" },
-  { id: 2, title_en: "Advanced KP Astrology", title_ta: "உயர்தர கே.பி ஜோதிடம்", date: "2026-04-15", price: 3000, attendees: 8, thumbnail: "/astrology_thumbnail.png" }
+  { id: 2, title_en: "Advanced KP Astrology", title_ta: "உயர்தர கே.பி ஜோதிடம்", date: "2026-04-15", price: 3000, attendees: 8, thumbnail: "/astrology_thumbnail.png" },
+  { id: 3, title_en: "Education & Extra-Curricular Consultation", title_ta: "கல்வி மற்றும் தனித்திறன் வகுப்புகள்", date: "Flexible Schedule", price: 0, attendees: 24, thumbnail: "/education_thumbnail.png" }
 ];
 
 const Classes = () => {
   const [classes, setClasses] = useState(() => {
     const saved = localStorage.getItem('aadhiguru_classes');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      let parsed = JSON.parse(saved);
+      // Auto-inject the education class if missing, or update it if present
+      const eduIndex = parsed.findIndex(c => c.id === 3);
+      if (eduIndex === -1) {
+        parsed = [...parsed, initialClasses[2]];
+      } else {
+        // Force update existing cache to the new free consultation setting
+        parsed[eduIndex] = initialClasses[2];
+      }
+      return parsed;
+    }
     return initialClasses;
   });
   
@@ -56,8 +68,16 @@ const Classes = () => {
   };
 
   const handleEnrollClick = (cls) => {
-    setEnrollingClass(cls);
-    setShowModal(true);
+    if (cls.price === 0) {
+      // Free consultation flow
+      setEnrollingClass(cls);
+      setSuccessMessage(`Your consultation request for ${cls.title_en} has been received. Our mentors will contact you shortly to schedule it.`);
+      setShowSuccess(true);
+    } else {
+      // Premium paid flow
+      setEnrollingClass(cls);
+      setShowModal(true);
+    }
   };
 
   const handlePayment = () => {
@@ -79,8 +99,8 @@ const Classes = () => {
         
         <div className="classes-header">
           <div>
-            <h2 className="section-title" style={{ textAlign: 'left', marginBottom: '0.5rem' }}>Astrology & Vastu Classes</h2>
-            <p className="section-subtitle" style={{ textAlign: 'left', marginBottom: '2rem' }}>Learn from our Gurus | எங்களின் குருக்களிடம் கற்கவும்</p>
+            <h2 className="section-title" style={{ textAlign: 'left', marginBottom: '0.5rem' }}>Astrology, Vastu & Education</h2>
+            <p className="section-subtitle" style={{ textAlign: 'left', marginBottom: '2rem' }}>Learn from our Gurus & Mentors | எங்களின் நிபுணர்களிடம் கற்கவும்</p>
           </div>
           <button 
             className={`admin-toggle ${isAdmin ? 'active' : ''}`} 
@@ -117,7 +137,9 @@ const Classes = () => {
             classes.map(cls => (
               <div key={cls.id} className="class-card">
                 <div className="class-thumbnail">
-                  <img src={cls.thumbnail || (cls.title_en.includes('Vastu') ? '/vastu_thumbnail.png' : '/astrology_thumbnail.png')} alt={cls.title_en} loading="lazy" />
+                  <div style={{ fontSize: '4rem', background: 'rgba(31, 138, 112, 0.1)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px 12px 0 0' }}>
+                    {cls.id === 3 ? '🎒' : (cls.title_en.includes('Vastu') ? '🧭' : '⭐')}
+                  </div>
                 </div>
                 <div className="class-content">
                   <h3 className="class-title-en">{cls.title_en}</h3>
@@ -125,14 +147,14 @@ const Classes = () => {
                   
                   <div className="class-details">
                     <p><strong>Date:</strong> {cls.date}</p>
-                    <p><strong>Fee:</strong> ₹{cls.price}</p>
+                    <p><strong>Fee:</strong> {cls.price === 0 ? <span style={{color: 'var(--color-primary)', fontWeight: 'bold'}}>Free Consultation</span> : `₹${cls.price}`}</p>
                     <p><strong>Enrolled:</strong> {cls.attendees} Students</p>
                   </div>
                 </div>
                 
                 <div className="class-actions">
-                  <button className="btn btn-primary w-100" onClick={() => handleEnrollClick(cls)}>
-                    Apply & Pay
+                  <button className={`btn ${cls.price === 0 ? 'btn-secondary' : 'btn-primary'} w-100`} onClick={() => handleEnrollClick(cls)}>
+                    {cls.price === 0 ? 'Request Consult' : 'Apply & Pay'}
                   </button>
                   {isAdmin && (
                     <button className="btn btn-danger w-100 mt-2" onClick={() => handleRemoveClass(cls.id)}>

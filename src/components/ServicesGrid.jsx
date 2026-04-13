@@ -10,6 +10,7 @@ const ServicesGrid = () => {
   
   // Booking Form States
   const [bookingService, setBookingService] = useState(null);
+  const [showEducationAlert, setShowEducationAlert] = useState(false);
   const [formData, setFormData] = useState({ name: '', phone: '', purpose: '', date: '', slot: '', gender: 'Male', locationFrom: '', locationTo: 'Thirumullaivoyal' });
   const [formSuccess, setFormSuccess] = useState(false);
   const [bookingId, setBookingId] = useState(null);
@@ -61,7 +62,7 @@ const ServicesGrid = () => {
 
   const handleBookClick = (service) => {
     if (['tuition', 'extracurricular'].includes(service.category)) {
-      alert('For Education and Extra Curricular activities, please register via the Classes page or Contact Us directly.');
+      setShowEducationAlert(true);
     } else {
       setBookingService(service);
       setFormSuccess(false);
@@ -138,32 +139,21 @@ const ServicesGrid = () => {
       return;
     }
 
-    // 1. Silent API trigger to send WhatsApp message to Owner without opening user's WhatsApp app
-    const targetNumber = '919600666225';
-    const whatsappMessage = `*New Service Booking*
-Service: ${bookingService.title}
-Client: ${formData.name} (${formData.gender})
-Phone: ${formData.phone}
-Purpose: ${formData.purpose}
-Location: ${formData.locationFrom}
-Time: ${formData.date} at ${formData.slot}`;
-
     try {
-      // FREE WHATSAPP API GATEWAY (CallMeBot)
-      // Since WhatsApp blocks direct silent messages to stop spam, this uses CallMeBot.
-      const apiKey = import.meta.env.VITE_CALLMEBOT_APIKEY; 
-      
-      if (apiKey) {
-        const encodedMessage = encodeURIComponent(whatsappMessage);
-        const url = `https://api.callmebot.com/whatsapp.php?phone=+919600666225&text=${encodedMessage}&apikey=${apiKey}`;
-        
-        await fetch(url, { mode: 'no-cors' })
-          .catch(err => console.log('Silent WA triggered', err));
-      } else {
-        console.warn("CallMeBot API Key missing! Cannot send WhatsApp silently.");
-      }
-      
-      // 2. Insert into Supabase "bookings" table directly triggering Edge Functions
+      // 1. Silent WhatsApp alert to Admin via Twilio Edge Function
+      await supabase.functions.invoke('send-whatsapp', {
+        body: {
+          action: 'notify-admin',
+          bookingDetails: {
+            serviceName: bookingService.title,
+            userName: formData.name,
+            date: formData.date,
+            time: formData.slot
+          }
+        }
+      });
+
+      // 2. Insert into Supabase table
       const { data, error } = await supabase.from('bookings').insert([{
         full_name: formData.name,
         gender: formData.gender,
@@ -177,18 +167,20 @@ Time: ${formData.date} at ${formData.slot}`;
         payment_status: 'unpaid'
       }]).select();
       
+      if (error) throw error;
+
       if (data && data.length > 0) {
         setBookingId(data[0].id);
         localStorage.setItem('userPhone', formData.phone);
       }
+      
+      setFormSuccess(true);
     } catch (error) {
-      console.error("Booking error:", error);
+      console.error("Booking process error:", error);
+      // Still show success UI locally so user doesn't get stuck, 
+      // but the logs will show us why the notification or DB insert failed.
+      setFormSuccess(true); 
     }
-
-    setFormSuccess(true);
-
-    setTimeout(() => {
-    }, 7000); 
   };
 
   return (
@@ -344,6 +336,31 @@ Time: ${formData.date} at ${formData.slot}`;
                 </button>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Education Alert Modal */}
+      {showEducationAlert && (
+        <div className="modal-overlay" onClick={() => setShowEducationAlert(false)}>
+          <div className="booking-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Special Notice</h3>
+              <button className="close-btn" onClick={() => setShowEducationAlert(false)}>✕</button>
+            </div>
+            <div className="success-message" style={{textAlign: 'center', padding: '2rem 1rem'}}>
+              <span className="success-icon" style={{color: 'var(--color-secondary)'}}>🎓</span>
+              <p style={{fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--color-primary)', marginTop: '1rem'}}>
+                Education & Extra Curricular
+              </p>
+              <p style={{marginTop: '0.8rem', lineHeight: '1.6', color: 'var(--color-text-muted)'}}>
+                For all educational courses and extracurricular activities, we have dedicated structured classes rather than one-off consultations.
+              </p>
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem', justifyContent: 'center', alignItems: 'center' }}>
+                <button className="btn" style={{ background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text)', padding: '0.8rem 1.5rem', fontWeight: '600' }} onClick={() => setShowEducationAlert(false)}>Go Back</button>
+                <Link to="/classes" className="btn btn-primary" style={{textDecoration: 'none', padding: '0.8rem 1.5rem', fontWeight: '600'}}>View Classes</Link>
+              </div>
+            </div>
           </div>
         </div>
       )}

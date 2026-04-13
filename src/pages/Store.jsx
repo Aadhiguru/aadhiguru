@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import './Store.css';
 
@@ -93,6 +94,8 @@ const Stars = ({ rating }) => {
 
 /* ── Main Store component ───────────────────────────── */
 const Store = () => {
+  const navigate = useNavigate();
+
   /* Products stored in localStorage */
   const [products, setProducts] = useState(() => {
     const saved = localStorage.getItem('aadhiguru_store_products');
@@ -128,11 +131,9 @@ const Store = () => {
   const [sortBy, setSortBy] = useState('popular');
   const [search, setSearch] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [sellOpen, setSellOpen] = useState(false);
   const [quickView, setQuickView] = useState(null);
   const [addedId, setAddedId] = useState(null);
-  const [orderSuccess, setOrderSuccess] = useState(false);
 
   /* Sell form state */
   const [sellForm, setSellForm] = useState({
@@ -141,12 +142,6 @@ const Store = () => {
     sellerName: '',
   });
   const [sellSuccess, setSellSuccess] = useState(false);
-
-  /* Checkout form state */
-  const [checkoutForm, setCheckoutForm] = useState({
-    fullName: '', phone: '', address: '', city: '', pincode: '',
-    paymentMethod: 'card', cardNumber: '', expiry: '', cvv: '',
-  });
 
   /* Persist */
   useEffect(() => { localStorage.setItem('aadhiguru_store_products', JSON.stringify(products)); }, [products]);
@@ -181,15 +176,6 @@ const Store = () => {
 
   const cartTotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
-
-  /* Checkout submit */
-  const handleCheckout = (e) => {
-    e.preventDefault();
-    setCheckoutOpen(false);
-    setOrderSuccess(true);
-    setCart([]);
-    setTimeout(() => setOrderSuccess(false), 4000);
-  };
 
   /* Sell submit */
   const handleSellSubmit = async (e) => {
@@ -332,7 +318,7 @@ const Store = () => {
 
       {/* ══ CART DRAWER ══════════════════════════════════ */}
       {cartOpen && (
-        <div className="drawer-overlay" onClick={() => setCartOpen(false)}>
+        <div className="drawer-overlay cart-overlay" onClick={() => setCartOpen(false)}>
           <div className="cart-drawer" onClick={e => e.stopPropagation()}>
             <div className="drawer-header">
               <h2>🛒 Your Cart</h2>
@@ -377,7 +363,7 @@ const Store = () => {
                     <span>Total</span>
                     <strong>₹{cartTotal.toLocaleString()}</strong>
                   </div>
-                  <button className="btn checkout-btn w-full" onClick={() => { setCartOpen(false); setCheckoutOpen(true); }}>
+                  <button className="btn checkout-btn w-full" onClick={() => { setCartOpen(false); navigate('/checkout'); }}>
                     Proceed to Checkout →
                   </button>
                 </div>
@@ -387,123 +373,10 @@ const Store = () => {
         </div>
       )}
 
-      {/* ══ CHECKOUT MODAL ════════════════════════════════ */}
-      {checkoutOpen && (
-        <div className="drawer-overlay" onClick={() => setCheckoutOpen(false)}>
-          <div className="checkout-modal" onClick={e => e.stopPropagation()}>
-            <div className="drawer-header">
-              <h2>📦 Checkout</h2>
-              <button className="drawer-close" onClick={() => setCheckoutOpen(false)}>✕</button>
-            </div>
-            <form className="checkout-form" onSubmit={handleCheckout}>
-              <h3 className="form-section-title">Delivery Address</h3>
-              <div className="form-row-2">
-                <div className="form-field">
-                  <label>Full Name</label>
-                  <input required placeholder="Your full name"
-                    value={checkoutForm.fullName}
-                    onChange={e => setCheckoutForm({ ...checkoutForm, fullName: e.target.value })}
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Phone</label>
-                  <input required placeholder="Mobile number"
-                    value={checkoutForm.phone}
-                    onChange={e => setCheckoutForm({ ...checkoutForm, phone: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="form-field">
-                <label>Address</label>
-                <input required placeholder="House no, Street, Area"
-                  value={checkoutForm.address}
-                  onChange={e => setCheckoutForm({ ...checkoutForm, address: e.target.value })}
-                />
-              </div>
-              <div className="form-row-2">
-                <div className="form-field">
-                  <label>City</label>
-                  <input required placeholder="City"
-                    value={checkoutForm.city}
-                    onChange={e => setCheckoutForm({ ...checkoutForm, city: e.target.value })}
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Pincode</label>
-                  <input required placeholder="6-digit pincode"
-                    value={checkoutForm.pincode}
-                    onChange={e => setCheckoutForm({ ...checkoutForm, pincode: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <h3 className="form-section-title">Payment Method</h3>
-              <div className="payment-methods">
-                {[
-                  { value: 'card', label: '💳 Card' },
-                  { value: 'upi', label: '📲 UPI' },
-                ].map(m => (
-                  <label key={m.value} className={`payment-option ${checkoutForm.paymentMethod === m.value ? 'selected' : ''}`}>
-                    <input type="radio" name="payment" value={m.value}
-                      checked={checkoutForm.paymentMethod === m.value}
-                      onChange={() => setCheckoutForm({ ...checkoutForm, paymentMethod: m.value })}
-                    />
-                    {m.label}
-                  </label>
-                ))}
-              </div>
-
-              {checkoutForm.paymentMethod === 'card' && (
-                <div className="card-fields">
-                  <div className="form-field">
-                    <label>Card Number</label>
-                    <input placeholder="XXXX XXXX XXXX XXXX" maxLength={19}
-                      value={checkoutForm.cardNumber}
-                      onChange={e => setCheckoutForm({ ...checkoutForm, cardNumber: e.target.value })}
-                    />
-                  </div>
-                  <div className="form-row-2">
-                    <div className="form-field">
-                      <label>Expiry</label>
-                      <input placeholder="MM/YY"
-                        value={checkoutForm.expiry}
-                        onChange={e => setCheckoutForm({ ...checkoutForm, expiry: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label>CVV</label>
-                      <input placeholder="•••" maxLength={4}
-                        value={checkoutForm.cvv}
-                        onChange={e => setCheckoutForm({ ...checkoutForm, cvv: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {checkoutForm.paymentMethod === 'upi' && (
-                <div className="form-field">
-                  <label>UPI ID</label>
-                  <input placeholder="yourname@upi" />
-                </div>
-              )}
-
-              <div className="checkout-total-bar">
-                <span>Order Total</span>
-                <strong>₹{cartTotal.toLocaleString()}</strong>
-              </div>
-
-              <button type="submit" className="btn btn-primary w-full">
-                ✅ Place Order
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* ══ SELL PRODUCT MODAL ════════════════════════════ */}
       {sellOpen && (
-        <div className="drawer-overlay" onClick={() => setSellOpen(false)}>
+        <div className="drawer-overlay modal-overlay" onClick={() => setSellOpen(false)}>
           <div className="checkout-modal" onClick={e => e.stopPropagation()}>
             <div className="drawer-header">
               <h2>🏪 List Your Product</h2>
@@ -592,7 +465,7 @@ const Store = () => {
 
       {/* ══ QUICK VIEW MODAL ══════════════════════════════ */}
       {quickView && (
-        <div className="drawer-overlay" onClick={() => setQuickView(null)}>
+        <div className="drawer-overlay modal-overlay" onClick={() => setQuickView(null)}>
           <div className="quick-view-modal" onClick={e => e.stopPropagation()}>
             <button className="drawer-close qv-close" onClick={() => setQuickView(null)}>✕</button>
             <div className="qv-emoji">{quickView.emoji}</div>
@@ -625,16 +498,6 @@ const Store = () => {
         </div>
       )}
 
-      {/* ══ ORDER SUCCESS TOAST ══════════════════════════ */}
-      {orderSuccess && (
-        <div className="order-toast">
-          <span>🎉</span>
-          <div>
-            <strong>Order Placed Successfully!</strong>
-            <p>Your items will be delivered soon. Thank you!</p>
-          </div>
-        </div>
-      )}
 
     </div>
   );

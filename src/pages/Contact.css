@@ -112,8 +112,8 @@
 .contact-form .btn-primary {
   padding: 1.25rem 2rem;
   font-size: 1.1rem;
-  font-weight: 600;
-  background: linear-gradient(135deg, var(--color-primary) 0%, #15735c 100%);
+  font-weight: 700;
+  background: var(--gradient-primary);
   border: none;
   border-radius: 0.5rem;
   box-shadow: 0 4px 15px rgba(31, 138, 112, 0.3);

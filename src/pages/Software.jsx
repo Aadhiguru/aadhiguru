@@ -1,17 +1,35 @@
+import { useNavigate } from 'react-router-dom';
 import './Software.css';
-import { useState } from 'react';
 
 const Software = () => {
-  const [showModal, setShowModal] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const handlePurchase = (e) => {
     e.preventDefault();
-    setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-      setShowModal(false);
-    }, 3000);
+    
+    // Add software to universal cart
+    const softwareProduct = {
+      id: 'software_pro_1',
+      category: 'Software',
+      name: 'AadhiGuru Pro Astrology Studio',
+      name_ta: 'ஆதிகுரு ப்ரோ ஆஸ்ட்ராலஜி',
+      price: 9999,
+      originalPrice: 14999,
+      qty: 1,
+      emoji: '💻',
+      seller: 'AadhiGuru'
+    };
+
+    const savedCart = localStorage.getItem('aadhiguru_cart');
+    let cart = savedCart ? JSON.parse(savedCart) : [];
+    
+    // Check if already in cart
+    if (!cart.find(item => item.id === softwareProduct.id)) {
+      cart.push(softwareProduct);
+      localStorage.setItem('aadhiguru_cart', JSON.stringify(cart));
+    }
+    
+    navigate('/checkout');
   };
 
   return (
@@ -31,7 +49,7 @@ const Software = () => {
               <span className="price-discount">Save 33%</span>
             </div>
             <div className="hero-actions">
-              <button className="btn btn-primary btn-glow" onClick={() => setShowModal(true)}>
+              <button className="btn btn-primary btn-glow" onClick={handlePurchase}>
                 🛒 Buy Now 
               </button>
               <a href="#features" className="btn btn-outline-white">Explore Features</a>
@@ -102,62 +120,7 @@ const Software = () => {
         </div>
       </section>
 
-      {/* Payment Modal */}
-      {showModal && (
-        <div className="drawer-overlay" onClick={() => setShowModal(false)}>
-          <div className="checkout-modal" onClick={e => e.stopPropagation()}>
-            <button className="drawer-close" onClick={() => setShowModal(false)}>✕</button>
-            
-            {success ? (
-              <div className="success-state">
-                <span className="success-check">✓</span>
-                <h3>Payment Successful!</h3>
-                <p>A download link and your unique license key have been sent to your email.</p>
-              </div>
-            ) : (
-              <div className="software-checkout">
-                <h2>Secure Checkout</h2>
-                <div className="checkout-summary">
-                  <div className="s-product">
-                    <strong>AadhiGuru Pro Studio</strong>
-                    <span>Lifetime License</span>
-                  </div>
-                  <div className="s-price">₹9,999</div>
-                </div>
-                
-                <form className="checkout-form" onSubmit={handlePurchase}>
-                  <div className="form-group">
-                    <label>Email Address (For License Key)</label>
-                    <input type="email" required placeholder="astrologer@example.com" />
-                  </div>
-                  <div className="form-group">
-                    <label>Card Number</label>
-                    <input type="text" required placeholder="XXXX XXXX XXXX XXXX" maxLength={19} />
-                  </div>
-                  <div className="form-row-2">
-                    <div className="form-group">
-                      <label>Expiry Date</label>
-                      <input type="text" required placeholder="MM/YY" maxLength={5} />
-                    </div>
-                    <div className="form-group">
-                      <label>CVV</label>
-                      <input type="password" required placeholder="•••" maxLength={4} />
-                    </div>
-                  </div>
-                  <button type="submit" className="btn btn-primary w-full btn-glow" style={{marginTop: '1rem'}}>
-                    Pay ₹9,999 Securely 🔒
-                  </button>
-                </form>
-                <div className="safe-checkout">
-                  <span>256-bit SSL Encrypted</span>
-                  <span>|</span>
-                  <span>14-Day Money Back Guarantee</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };

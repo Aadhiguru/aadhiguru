@@ -220,7 +220,7 @@
 .search-find-btn {
   width: 100%;
   padding: 1rem;
-  background: linear-gradient(135deg, #1f8a70 0%, #0f6652 100%);
+  background: var(--gradient-primary);
   color: white;
   font-size: 1rem;
   font-weight: 700;
@@ -229,7 +229,7 @@
   cursor: pointer;
   transition: all 0.25s ease;
   letter-spacing: 0.5px;
-  box-shadow: 0 6px 24px rgba(31,138,112,0.4);
+  box-shadow: 0 6px 24px rgba(31,138,112,0.3);
 }
 
 .search-find-btn:hover {
@@ -482,8 +482,8 @@
 .spb-btn {
   width: 100%;
   padding: 0.65rem 1rem;
-  background: linear-gradient(135deg, #f59e0b, #f38d3e);
-  color: #1a1a2e;
+  background: var(--gradient-primary);
+  color: white;
   font-weight: 800;
   font-size: 0.85rem;
   border-radius: 8px;
@@ -491,7 +491,7 @@
   cursor: pointer;
   transition: all 0.2s;
 }
-.spb-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(245,158,11,0.4); }
+.spb-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(31, 138, 112, 0.4); }
 
 /* ══════════════════════════════════════════════════
    TABS BAR
@@ -773,9 +773,9 @@
   flex: 1;
   padding: 0.7rem 1rem;
   border-radius: 10px;
-  border: 2px solid #fca5a5;
-  background: #fff5f5;
-  color: #ef4444;
+  border: 2px solid #e2e8f0;
+  background: #f9fafb;
+  color: var(--color-primary);
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
@@ -783,10 +783,10 @@
   min-width: 130px;
 }
 .pcard-interest-btn:hover {
-  background: #ef4444;
+  background: var(--color-primary);
   color: white;
-  border-color: #ef4444;
-  box-shadow: 0 4px 16px rgba(239,68,68,0.3);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 16px rgba(31, 138, 112, 0.3);
 }
 
 .pcard-view-btn {
@@ -802,7 +802,7 @@
 }
 
 .pcard-view-btn.locked {
-  background: linear-gradient(135deg, #1f8a70, #0f6652);
+  background: var(--gradient-primary);
   color: white;
   box-shadow: 0 4px 16px rgba(31,138,112,0.3);
 }
@@ -812,13 +812,13 @@
 }
 
 .pcard-view-btn.unlocked {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: var(--gradient-primary);
   color: white;
-  box-shadow: 0 4px 16px rgba(59,130,246,0.3);
+  box-shadow: 0 4px 16px rgba(31,138,112,0.3);
 }
 .pcard-view-btn.unlocked:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(59,130,246,0.4);
+  box-shadow: 0 6px 20px rgba(31,138,112,0.4);
 }
 
 /* ── Empty State ── */
@@ -1085,7 +1085,7 @@
 .pay-cta-btn {
   width: 100%;
   padding: 1rem;
-  background: linear-gradient(135deg, #1f8a70, #0f6652);
+  background: var(--gradient-primary);
   color: white;
   font-size: 1rem;
   font-weight: 800;
@@ -1389,18 +1389,16 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.85rem;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: var(--gradient-primary);
   color: white;
   font-weight: 700;
   font-size: 0.95rem;
   border-radius: 10px;
   transition: all 0.2s;
 }
-.send-interest-big:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(239,68,68,0.4); }
+.send-interest-big:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(31,138,112,0.4); }
 
-/* ══════════════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════════════ */
+/* ── Responsive ────────────────────────────────────── */
 @media (max-width: 1024px) {
   .mp-hero-inner {
     grid-template-columns: 1fr;
@@ -1418,20 +1416,48 @@
   .mp-sidebar { position: static; }
 }
 
+@media (max-width: 768px) {
+  .mp-stats-strip { 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .mp-stat { 
+    border-right: 1px solid rgba(255,255,255,0.08); 
+    border-bottom: 1px solid rgba(255,255,255,0.08); 
+    padding: 1.5rem 1rem;
+  }
+  .mp-stat:nth-child(even) { border-right: none; }
+  .mp-stat:nth-last-child(-n+2) { border-bottom: none; }
+}
+
 @media (max-width: 680px) {
   .pcard { grid-template-columns: 1fr; }
-  .pcard-photo { min-height: 160px; }
-  .pcard-details-grid { grid-template-columns: 1fr 1fr; }
-  .mp-stats-strip { display: grid; grid-template-columns: 1fr 1fr; }
-  .mp-stat { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .pcard-photo { min-height: 180px; }
+  .pcard-avatar { font-size: 4rem; }
+  .pcard-details-grid { grid-template-columns: repeat(2, 1fr); padding: 0.5rem; }
   .fp-grid-2 { grid-template-columns: 1fr; }
   .pay-plans { grid-template-columns: 1fr; }
+  .mp-search-card { padding: 1.5rem; }
 }
 
 @media (max-width: 480px) {
   .mp-hero-h1 { font-size: 2.2rem; }
   .pcard-actions { flex-direction: column; }
   .search-form-grid { grid-template-columns: 1fr; }
-  .mp-tabs-bar { padding: 0.25rem; }
+  .mp-tabs-bar { 
+    padding: 0.25rem; 
+    margin-left: -1rem; 
+    margin-right: -1rem; 
+    border-radius: 0;
+    justify-content: flex-start;
+  }
   .mp-tab { font-size: 0.73rem; padding: 0.45rem 0.7rem; }
+  .pcard-name { font-size: 1.1rem; }
+  .pcard-info { padding: 1.25rem 1rem; }
+  .pcard-details-grid { gap: 0.25rem; }
+  .ms-chip-group { justify-content: center; }
+  .mp-stats-strip { grid-template-columns: 1fr; }
+  .mp-stat { border-right: none; }
+  .mp-stat:nth-last-child(2) { border-bottom: 1px solid rgba(255,255,255,0.08); }
 }

@@ -16,6 +16,8 @@ import AcceptBooking from './pages/AcceptBooking';
 import RejectBooking from './pages/RejectBooking';
 import PaymentPage from './pages/PaymentPage';
 import UserDashboard from './pages/UserDashboard';
+import Checkout from './pages/Checkout';
+import ProfileSettings from './pages/ProfileSettings';
 
 function App() {
   return (
@@ -33,11 +35,13 @@ function App() {
           <Route path="/store" element={<Store />} />
           <Route path="/software" element={<Software />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/profile" element={<ProfileSettings />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/accept" element={<AcceptBooking />} />
           <Route path="/reject" element={<RejectBooking />} />
           <Route path="/pay" element={<PaymentPage />} />
           <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/checkout" element={<Checkout />} />
         </Routes>
         <Footer />
       </div>

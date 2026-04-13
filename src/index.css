@@ -1,10 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --color-primary: #1F8A70; /* Modern Green for actions/auspicious vibe */
+  --color-primary: #1F8A70;
   --color-primary-hover: #166854;
-  --color-secondary: #F38D3E; /* Deep Orange for traditional accents */
-  --color-bg: #FDFBF7; /* Soft aesthetic cream background */
+  --color-secondary: #F38D3E;
+  --gradient-primary: linear-gradient(135deg, #1F8A70 0%, #166854 100%);
+  --color-bg: #FDFBF7;
   --color-surface: #FFFFFF;
   --color-text: #2D3748; /* Softer than pure black */
   --color-text-muted: #718096;
@@ -93,25 +94,27 @@ button {
 }
 
 .btn-primary {
-  background-color: var(--color-primary);
+  background: var(--gradient-primary);
   color: white;
+  box-shadow: 0 4px 12px rgba(31, 138, 112, 0.2);
 }
 
 .btn-primary:hover {
-  background-color: var(--color-primary-hover);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 10px 20px rgba(31, 138, 112, 0.3);
+  background: linear-gradient(135deg, #166854 0%, #0f4d3e 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(31, 138, 112, 0.3);
 }
 
 .btn-secondary {
-  background-color: var(--color-secondary);
+  background: var(--gradient-primary); /* Making all buttons same color as requested */
   color: white;
+  box-shadow: 0 4px 12px rgba(31, 138, 112, 0.2);
 }
 
 .btn-secondary:hover {
-  background-color: #d8762a;
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 10px 20px rgba(243, 141, 62, 0.3);
+  background: linear-gradient(135deg, #166854 0%, #0f4d3e 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(31, 138, 112, 0.3);
 }
 
 /* Responsive adjustments */

@@ -47,6 +47,25 @@ const AppointmentForm = () => {
 
       if (error) throw error;
       
+      // SEND WHATSAPP TO ADMIN
+      try {
+        const { data: invData, error: invError } = await supabase.functions.invoke('send-whatsapp', {
+          body: {
+            action: 'notify-admin',
+            bookingDetails: {
+              serviceName: formData.purpose,
+              userName: formData.fullName,
+              date: formData.date,
+              time: 'To be confirmed'
+            }
+          }
+        });
+        if (invError) console.error('Supabase Function Error:', invError);
+        if (invData) console.log('WhatsApp notification sent:', invData);
+      } catch (err) {
+        console.error('WhatsApp alert to admin failed:', err);
+      }
+      
       setShowSuccess(true);
       // Reset form
       setFormData({

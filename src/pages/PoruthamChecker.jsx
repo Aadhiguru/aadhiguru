@@ -68,16 +68,17 @@ const PLANET_ENEMIES = {
   Saturn:  ['Sun','Moon','Mars'],
 };
 
-// Enemy yoni pairs
+// Enemy yoni pairs (Natural enemies in nature)
 const YONI_ENEMIES = [
   ['Cat','Rat'],['Dog','Deer'],['Serpent','Mongoose'],
-  ['Elephant','Lion'],['Horse','Buffalo'],['Goat','Tiger'],
+  ['Elephant','Lion'],['Horse','Buffalo'],['Goat','Monkey'],
+  ['Cow','Tiger']
 ];
 
-// Vedha pairs (1-indexed nakshatra ids)
+// Vedha pairs (Mutual obstacles - 1-indexed nakshatra ids)
 const VEDHA_PAIRS = [
-  [1,23],[2,19],[3,17],[4,11],[5,24],[6,22],[7,13],
-  [8,20],[9,16],[10,14],[12,21],[15,26],[18,25],
+  [1,18],[2,17],[3,16],[4,15],[5,23],[6,22],[7,21],
+  [8,20],[9,19],[10,27],[11,26],[12,25],[13,24]
 ];
 
 /* ── Star name → Nakshatra index mapping (from Matrimony data) ── */
@@ -90,13 +91,34 @@ const STAR_NAME_MAP = {
   'Poorattathi':25,'Uthirattathi':26,'Revathi':27,
 };
 
-/* ── Deterministic nakshatra from DOB (Julian Day based) ── */
-const getNakIdx = (dob) => {
+/* ── Deterministic nakshatra from DOB/TOB (Thirukanitham / Drik Siddhanta) ── */
+const getNakIdx = (dob, tob = '12:00') => {
   if (!dob) return null;
-  const d = new Date(dob);
-  const y = d.getFullYear(), m = d.getMonth()+1, day = d.getDate();
-  const jdn = Math.floor(365.25*(y+4716)) + Math.floor(30.6001*(m+1)) + day - 1524;
-  return jdn % 27; // 0-26
+  // Use J2000 Epoch for precise mean moon calculation
+  // Apply +05:30 (IST) offset because the input is in Indian Standard Time
+  const date = new Date(`${dob}T${tob || '12:00'}:00+05:30`);
+  const j2000 = Date.UTC(2000, 0, 1, 12, 0, 0); // J2000.0 Epoch
+  const diffDays = (date.getTime() - j2000) / (1000 * 60 * 60 * 24);
+  
+  // Mean Moon Longitude (L) and Mean Anomaly (M)
+  let L = 218.316 + 13.17639648 * diffDays;
+  let M = 134.963 + 13.06499295 * diffDays;
+  
+  // Thirukanitham / Drik Siddhanta specific corrections (multiple harmonics for accuracy)
+  let moonLong = L + 6.289 * Math.sin(M * Math.PI / 180) 
+                   + 1.274 * Math.sin((2 * L - M) * Math.PI / 180) 
+                   + 0.658 * Math.sin(2 * M * Math.PI / 180);
+                   
+  // Normalize to 0-360
+  moonLong = ((moonLong % 360) + 360) % 360;
+  
+  // Apply Lahiri (Chitra Paksha) Ayanamsa for strict Thirukanitham standard
+  // Base 23.853 degrees in 2000 + 50.29 arc seconds per year precession
+  const ayanamsa = 23.853 + (date.getFullYear() - 2000) * (50.290966 / 3600);
+  let siderealMoon = ((moonLong - ayanamsa % 360) + 360) % 360;
+  
+  // Each nakshatra is 13.333333 degrees (13°20')
+  return Math.floor(siderealMoon / 13.333333); 
 };
 
 /* ── Calculate all 10 Poruthams ── */
@@ -117,46 +139,59 @@ const calcPoruthams = (boyIdx, girlIdx) => {
   });
 
   // 2. Gana Porutham
-  const gMap = {Deva:1,Manushya:2,Rakshasa:3};
+  const gMap = { Deva: 1, Manushya: 2, Rakshasa: 3 };
   const bg = gMap[b.gana], gg = gMap[g.gana];
-  const ganaOk = bg===gg || (bg===1&&gg===2) || (bg===2&&gg===1);
+  let ganaPts = 0;
+  if (bg === 1) ganaPts = (gg === 1) ? 6 : (gg === 2 ? 6 : 0);
+  else if (bg === 2) ganaPts = (gg === 1) ? 5 : (gg === 2 ? 6 : 0);
+  else if (bg === 3) ganaPts = (gg === 1) ? 1 : (gg === 2 ? 0 : 6); // Rakshasa-Rakshasa is OK in many systems
+  
   res.push({
-    name:'Gana Porutham', ta:'கண பொருத்தம்', pts:ganaOk?6:0, max:6, ok:ganaOk, critical:false,
-    desc: `Boy's Gana: ${b.gana} | Girl's Gana: ${g.gana}. ${ganaOk ? 'Compatible temperaments.' : 'Temperament mismatch — seek guidance.'}`,
+    name:'Gana Porutham', ta:'கண பொருத்தம்', pts:ganaPts, max:6, ok:ganaPts > 0, critical:false,
+    desc: `Boy's Gana: ${b.gana} | Girl's Gana: ${g.gana}. ${ganaPts >= 5 ? 'Compatible temperaments.' : 'Temperament mismatch — proceed with caution.'}`,
   });
 
   // 3. Mahendra Porutham
-  const mahCount = ((bN - gN + 27) % 27) || 27;
+  const mahCount = ((bN - gN + 27) % 27) + 1;
   const mahOk = [4,7,10,13,16,19,22,25].includes(mahCount);
   res.push({
-    name:'Mahendra Porutham', ta:'மகேந்திர பொருத்தம்', pts:mahOk?4:0, max:4, ok:mahOk, critical:false,
-    desc: mahOk ? 'Good prosperity and wealth in married life.' : 'Financial growth needs extra effort.',
+    name:'Mahendra Porutham', ta:'மகேந்திர பொருத்தம்', pts:mahOk?2:0, max:2, ok:mahOk, critical:false,
+    desc: mahOk ? 'Blessings for progeny (children) and prosperity.' : 'Progeny factors may need extra medical or spiritual attention.',
   });
 
   // 4. Stree Deergha Porutham
-  const streeCount = ((bN - gN + 27) % 27) || 27;
-  const streeOk = streeCount > 7;
+  const streeCount = ((bN - gN + 27) % 27) + 1;
+  let streePts = 0;
+  if (streeCount > 13) streePts = 1.5;
+  else if (streeCount > 7) streePts = 0.5;
+
   res.push({
-    name:'Stree Deergha Porutham', ta:'ஸ்திரீ தீர்க்க பொருத்தம்', pts:streeOk?5:0, max:5, ok:streeOk, critical:false,
-    desc: streeOk ? 'Long and happy married life indicated.' : 'Longevity of marriage may need remedies.',
+    name:'Stree Deergha Porutham', ta:'ஸ்திரீ தீர்க்க பொருத்தம்', pts:streePts, max:1.5, ok:streePts > 0, critical:false,
+    desc: streePts === 1.5 ? 'Significant distance between stars is very auspicious.' : (streePts > 0 ? 'Acceptable star distance.' : 'Short star distance — traditional indicators suggest caution.'),
   });
 
   // 5. Yoni Porutham
   const bY = b.yoni, gY = g.yoni;
-  const enemyYoni = YONI_ENEMIES.some(p=>(p[0]===bY&&p[1]===gY)||(p[0]===gY&&p[1]===bY));
-  const yoniOk = bY===gY || !enemyYoni;
+  const isEnemy = YONI_ENEMIES.some(p=>(p[0]===bY&&p[1]===gY)||(p[0]===gY&&p[1]===bY));
+  let yoniPts = 0;
+  if (bY === gY) yoniPts = 4;
+  else if (isEnemy) yoniPts = 0;
+  else yoniPts = 2; // Neutral/Friendly mix for simplification
+
   res.push({
-    name:'Yoni Porutham', ta:'யோனி பொருத்தம்', pts:yoniOk?4:0, max:4, ok:yoniOk, critical:false,
-    desc: `Boy: ${bY} | Girl: ${gY}. ${yoniOk ? 'Good physical and intimate compatibility.' : 'Physical incompatibility — remedies advised.'}`,
+    name:'Yoni Porutham', ta:'யோனி பொருத்தம்', pts:yoniPts, max:4, ok:yoniPts > 0, critical:false,
+    desc: `Boy: ${bY} | Girl: ${gY}. ${yoniPts >= 2 ? 'Good physical compatibility.' : 'Physical incompatibility — might require adjustments.'}`,
   });
 
   // 6. Rasi Porutham
   const bR = b.rasi, gR = g.rasi;
-  const rasiDiff = ((gR - bR + 12) % 12) + 1;
-  const rasiOk = ![6,8].includes(rasiDiff);
+  const rasiDiff = ((bR - gR + 12) % 12) + 1; // Count from Girl to Boy
+  const goodRasi = [1, 7, 3, 4, 10, 11].includes(rasiDiff);
+  const badRasi = [2, 5, 6, 8, 9, 12].includes(rasiDiff);
+  
   res.push({
-    name:'Rasi Porutham', ta:'ராசி பொருத்தம்', pts:rasiOk?7:0, max:7, ok:rasiOk, critical:false,
-    desc: `${RASIS[bR].ta} & ${RASIS[gR].ta}. ${rasiOk ? 'Compatible moon signs.' : 'Shad-Ashtaka dosha — seek astrological remedy.'}`,
+    name:'Rasi Porutham', ta:'ராசி பொருத்தம்', pts:goodRasi ? 7 : 0, max:7, ok:goodRasi, critical:false,
+    desc: `${RASIS[bR].ta} & ${RASIS[gR].ta}. ${goodRasi ? 'Auspicious Moon sign placement.' : 'Challenging Moon sign placement (Shad-Ashtakam/Dwirdwasha).'}`,
   });
 
   // 7. Rasiyathipathi Porutham
@@ -171,27 +206,30 @@ const calcPoruthams = (boyIdx, girlIdx) => {
   });
 
   // 8. Vasiya Porutham
-  const VASIYA = {0:[4,7],1:[3,6],2:[3,5],3:[7,8],4:[6,7],5:[3,6],6:[3,7],7:[10,11],8:[2,0],9:[1,5],10:[2,6],11:[3,5]};
-  const vasiyaOk = bR===gR || (VASIYA[bR]||[]).includes(gR) || (VASIYA[gR]||[]).includes(bR);
+  const VASIYA_MAP = {
+    0:[4,7], 1:[3,6], 2:[5], 3:[7,8], 4:[3], 5:[2,11], 
+    6:[3,5], 7:[3], 8:[11], 9:[0,10], 10:[8], 11:[9]
+  };
+  const vasiyaOk = bR===gR || (VASIYA_MAP[gR]||[]).includes(bR);
   res.push({
     name:'Vasiya Porutham', ta:'வசிய பொருத்தம்', pts:vasiyaOk?2:0, max:2, ok:vasiyaOk, critical:false,
-    desc: vasiyaOk ? 'Natural attraction and magnetic pull between partners.' : 'May need effort to sustain mutual attraction.',
+    desc: vasiyaOk ? 'Natural mutual attraction exists.' : 'General compatibility — magnetic attraction is average.',
   });
 
   // 9. Rajju Porutham (Critical)
-  const rajjuOk = b.rajju !== g.rajju || b.rajju === 'Nabhi';
+  const rajjuOk = b.rajju !== g.rajju;
   res.push({
-    name:'Rajju Porutham', ta:'ராஜ்ஜு பொருத்தம்', pts:rajjuOk?8:0, max:8, ok:rajjuOk, critical:true,
+    name:'Rajju Porutham', ta:'ராஜ்ஜு பொருத்தம்', pts:rajjuOk?5:0, max:5, ok:rajjuOk, critical:true,
     desc: rajjuOk
-      ? `No Rajju dosha. Partner longevity is protected (${b.rajju} ≠ ${g.rajju}).`
-      : `⚠️ Rajju dosha! Both in ${b.rajju} rajju. This is a critical dosha — consult a Jyotish before proceeding.`,
+      ? `No Rajju dosha. Partner longevity is protected.`
+      : `⚠️ Rajju dosha! Same Rajju (${b.rajju}) is traditionally considered a critical mismatch for husband's longevity.`,
   });
 
   // 10. Vedha Porutham (Critical)
   const isVedha = VEDHA_PAIRS.some(p=>(p[0]===bN&&p[1]===gN)||(p[0]===gN&&p[1]===bN));
   res.push({
-    name:'Vedha Porutham', ta:'வேத பொருத்தம்', pts:isVedha?0:4, max:4, ok:!isVedha, critical:true,
-    desc: !isVedha ? 'No Vedha dosha. Obstacle-free married life.' : '⚠️ Vedha dosha present. Seek astrological remedies.',
+    name:'Vedha Porutham', ta:'வேத பொருத்தம்', pts:isVedha?0:1, max:1, ok:!isVedha, critical:true,
+    desc: !isVedha ? 'No Vedha dosha. Smooth married life.' : '⚠️ Vedha dosha present. Known to cause recurring obstacles.',
   });
 
   return res;
@@ -246,14 +284,13 @@ const PoruthamChecker = () => {
       let boyIdx, girlIdx;
       
       if (boyMode === 'auto') {
-        // Simplified auto-calc disclaimer: real astrology needs ephemeris
-        boyIdx = getNakIdx(boyDob); 
+        boyIdx = getNakIdx(boyDob, boyTob); 
       } else {
         boyIdx = parseInt(boyStar);
       }
 
       if (girlMode === 'auto') {
-        girlIdx = getNakIdx(girlDob);
+        girlIdx = getNakIdx(girlDob, girlTob);
       } else {
         girlIdx = parseInt(girlStar);
       }

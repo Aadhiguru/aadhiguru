@@ -237,7 +237,7 @@
 .pc-check-btn {
   width: 100%;
   padding: 1.1rem;
-  background: linear-gradient(135deg, var(--color-primary), #166854);
+  background: var(--gradient-primary);
   color: white;
   border: none;
   border-radius: var(--radius-full);
@@ -464,7 +464,7 @@
   flex: 1;
   min-width: 180px;
   padding: 0.9rem 1.5rem;
-  background: linear-gradient(135deg, #0f3460, #1F8A70);
+  background: var(--gradient-primary);
   color: white;
   border: none;
   border-radius: var(--radius-full);
@@ -477,7 +477,7 @@
   justify-content: center;
   gap: 0.5rem;
 }
-.pc-print-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.2); }
+.pc-print-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(31, 138, 112, 0.3); }
 
 .pc-new-btn {
   flex: 1;
@@ -556,25 +556,40 @@
 @media (max-width: 768px) {
   .pc-persons {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
   .pc-divider-center {
     flex-direction: row;
-    padding-top: 0;
+    padding: 1.5rem 0;
     justify-content: center;
   }
-  .pc-connector-line { width: 60px; height: 2px; background: linear-gradient(to right, var(--color-border), transparent); }
+  .pc-connector-line { 
+    width: 80px; 
+    height: 2px; 
+    background: linear-gradient(to right, transparent, var(--color-border), transparent); 
+  }
   .pc-names-row {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
   .pc-score-orb { order: -1; }
   .pc-hero-title { font-size: 2.2rem; }
   .pc-actions { flex-direction: column; }
+  .pc-section-title { font-size: 1.25rem; }
 }
 
 @media (max-width: 480px) {
-  .pc-form { padding: 1.5rem; }
+  .pc-hero { padding: 3rem 0 2.5rem; }
+  .pc-form { padding: 1.5rem 1rem; border-radius: var(--radius-lg); }
   .pc-hero-title { font-size: 1.8rem; }
   .pc-table { font-size: 0.8rem; }
-  .pc-table th, .pc-table td { padding: 0.6rem 0.6rem; }
+  .pc-table th, .pc-table td { padding: 0.6rem 0.5rem; }
   .td-desc { display: none; }
+  .td-ta { display: none; }
+  .pc-table thead th:nth-child(3), 
+  .pc-table tbody td:nth-child(3) { display: none; }
+  .pc-benefit { font-size: 0.75rem; padding: 0.3rem 0.75rem; }
+  .pc-section-title { font-size: 1.15rem; }
+  .pmc-info h4 { font-size: 0.85rem; }
+  .pc-verdict-card { padding: 1.5rem; flex-direction: column; align-items: center; text-align: center; }
 }

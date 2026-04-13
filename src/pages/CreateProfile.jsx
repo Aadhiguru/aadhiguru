@@ -80,7 +80,7 @@ const CreateProfile = () => {
           father_occ: formData.fatherOcc,
           mother_occ: formData.motherOcc,
           marital_status: formData.maritalStatus,
-          about: formData.about
+          preview: formData.about
         }]);
 
       if (error) throw error;

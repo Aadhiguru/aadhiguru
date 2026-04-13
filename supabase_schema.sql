@@ -24,7 +24,9 @@ CREATE TABLE IF NOT EXISTS public.store_products (
 
 -- RLS for Store Products
 ALTER TABLE public.store_products ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read access on store_products" ON public.store_products;
 CREATE POLICY "Allow public read access on store_products" ON public.store_products FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public insert on store_products" ON public.store_products;
 CREATE POLICY "Allow public insert on store_products" ON public.store_products FOR INSERT WITH CHECK (true);
 
 
@@ -45,7 +47,9 @@ CREATE TABLE IF NOT EXISTS public.service_bookings (
 
 -- RLS for Service Bookings
 ALTER TABLE public.service_bookings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public insert on bookings" ON public.service_bookings;
 CREATE POLICY "Allow public insert on bookings" ON public.service_bookings FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow users to view own bookings based on phone" ON public.service_bookings;
 CREATE POLICY "Allow users to view own bookings based on phone" ON public.service_bookings FOR SELECT USING (true); -- Usually restricted by auth uid
 
 
@@ -84,7 +88,9 @@ CREATE TABLE IF NOT EXISTS public.matrimony_profiles (
 
 -- RLS for Matrimony Profiles
 ALTER TABLE public.matrimony_profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read on matrimony_profiles" ON public.matrimony_profiles;
 CREATE POLICY "Allow public read on matrimony_profiles" ON public.matrimony_profiles FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public insert on matrimony_profiles" ON public.matrimony_profiles;
 CREATE POLICY "Allow public insert on matrimony_profiles" ON public.matrimony_profiles FOR INSERT WITH CHECK (true);
 
 
@@ -102,7 +108,9 @@ CREATE TABLE IF NOT EXISTS public.classes (
 
 -- RLS for Classes
 ALTER TABLE public.classes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read on classes" ON public.classes;
 CREATE POLICY "Allow public read on classes" ON public.classes FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public insert on classes" ON public.classes;
 CREATE POLICY "Allow public insert on classes" ON public.classes FOR INSERT WITH CHECK (true);
 
 
@@ -139,8 +147,11 @@ CREATE TABLE IF NOT EXISTS public.bookings (
 
 -- RLS for Bookings
 ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public insert on bookings" ON public.bookings;
 CREATE POLICY "Allow public insert on bookings" ON public.bookings FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow public select on bookings for payment flow" ON public.bookings;
 CREATE POLICY "Allow public select on bookings for payment flow" ON public.bookings FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public update on bookings for accept/reject/payment" ON public.bookings;
 CREATE POLICY "Allow public update on bookings for accept/reject/payment" ON public.bookings FOR UPDATE USING (true);
 
 -- Trigger for Edge Function
@@ -171,3 +182,47 @@ DROP TRIGGER IF EXISTS on_booking_activity ON public.bookings;
 CREATE TRIGGER on_booking_activity
 AFTER INSERT OR UPDATE ON public.bookings
 FOR EACH ROW EXECUTE FUNCTION trigger_whatsapp_notification();
+-- 6. User Profiles Table (Automatic Sync)
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id uuid REFERENCES auth.users(id) PRIMARY KEY,
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  username text UNIQUE,
+  full_name text,
+  avatar_url text,
+  role text DEFAULT 'user',
+  email text UNIQUE,
+  phone text
+);
+
+-- RLS for Profiles
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone." ON public.profiles;
+CREATE POLICY "Public profiles are viewable by everyone." ON public.profiles FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can insert their own profile." ON public.profiles;
+CREATE POLICY "Users can insert their own profile." ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
+DROP POLICY IF EXISTS "Users can update own profile." ON public.profiles;
+CREATE POLICY "Users can update own profile." ON public.profiles FOR UPDATE USING (auth.uid() = id);
+
+-- Trigger Function: Handle New User
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, username, full_name, avatar_url, role, email, phone)
+  VALUES (
+    NEW.id,
+    NEW.raw_user_meta_data->>'username',
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.raw_user_meta_data->>'avatar_url',
+    COALESCE(NEW.raw_user_meta_data->>'role', 'user'),
+    NEW.email,
+    NEW.raw_user_meta_data->>'phone'
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger: On Auth User Created
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();

@@ -36,7 +36,31 @@ const AdminDashboard = () => {
 
   const updateStatus = async (id, newStatus) => {
     const { error } = await supabase.from('bookings').update({ status: newStatus }).eq('id', id);
-    if (!error) fetchBookings();
+    if (!error) {
+      fetchBookings();
+      // If accepted, send WhatsApp to the User
+      if (newStatus === 'accepted') {
+        const booking = bookings.find(b => b.id === id);
+        if (booking) {
+          try {
+            await supabase.functions.invoke('send-whatsapp', {
+              body: {
+                action: 'notify-user',
+                userPhone: booking.phone_number,
+                bookingDetails: {
+                  serviceName: booking.purpose_of_booking,
+                  userName: booking.full_name,
+                  date: booking.date,
+                  time: booking.time_slot || 'To be confirmed'
+                }
+              }
+            });
+          } catch (err) {
+            console.error('Failed to notify user via WhatsApp:', err);
+          }
+        }
+      }
+    }
   };
 
   // Analytics Computation
