@@ -4,76 +4,38 @@ import './Software.css';
 const Software = () => {
   const navigate = useNavigate();
 
-  const handlePurchase = (e) => {
-    e.preventDefault();
-    
-    // Add software to universal cart
-    const softwareProduct = {
-      id: 'software_pro_1',
-      category: 'Software',
-      name: 'AadhiGuru Pro Astrology Studio',
-      name_ta: 'ஆதிகுரு ப்ரோ ஆஸ்ட்ராலஜி',
-      price: 9999,
-      originalPrice: 14999,
-      qty: 1,
-      emoji: '💻',
-      seller: 'AadhiGuru'
-    };
-
-    const savedCart = localStorage.getItem('aadhiguru_cart');
-    let cart = savedCart ? JSON.parse(savedCart) : [];
-    
-    // Check if already in cart
-    if (!cart.find(item => item.id === softwareProduct.id)) {
-      cart.push(softwareProduct);
-      localStorage.setItem('aadhiguru_cart', JSON.stringify(cart));
-    }
-    
-    navigate('/checkout');
-  };
-
   return (
     <div className="software-page">
       {/* Hero Section */}
       <section className="software-hero">
         <div className="container software-hero-container">
           <div className="software-hero-content">
-            <div className="badge-premium">Premium Software ✦</div>
+            <div className="badge-exclusive">App Exclusive ✦</div>
             <h1 className="software-title">AadhiGuru Pro Astrology Studio</h1>
             <p className="software-subtitle">
-              The ultimate high-precision astrology desktop application. Trusted by professional astrologers worldwide for generating accurate KP setups, detailed horoscopes, and deep Vastu reports.
+              The ultimate high-precision astrology desktop & mobile powerhouse. Now integrated exclusively within the AadhiGuru Ecosystem. Not available for individual sale.
             </p>
-            <div className="software-price">
-              <span className="price-current">₹9,999</span>
-              <span className="price-old">₹14,999</span>
-              <span className="price-discount">Save 33%</span>
+            
+            <div className="not-for-sale-box">
+              <span className="info-icon">ℹ️</span>
+              <div>
+                <strong>Not for Sale</strong>
+                <p>This software is now a complimentary part of our mobile app experience.</p>
+              </div>
             </div>
+
             <div className="hero-actions">
-              <button className="btn btn-primary btn-glow" onClick={handlePurchase}>
-                🛒 Buy Now 
+              <button className="btn btn-primary btn-glow" onClick={() => window.open('#', '_blank')}>
+                📱 Get the App
               </button>
               <a href="#features" className="btn btn-outline-white">Explore Features</a>
             </div>
-            <p className="license-info">✓ Lifetime License • Windows & Mac • Free Updates for 1 Year</p>
+            <p className="license-info">✓ Included with App Membership • Sync across devices • Cloud Backup</p>
           </div>
           <div className="software-hero-visual">
-            <div className="glass-mockup">
-              <div className="mockup-header">
-                <span className="dot dot-red"></span>
-                <span className="dot dot-yellow"></span>
-                <span className="dot dot-green"></span>
-              </div>
-              <div className="mockup-body">
-                <div className="app-sidebar"></div>
-                <div className="app-main">
-                  <div className="chart-circle">
-                    <div className="inner-chart"></div>
-                  </div>
-                  <div className="app-data-bars">
-                    <div></div><div></div><div></div>
-                  </div>
-                </div>
-              </div>
+            <div className="poster-frame">
+              <img src="/images/software-poster.png" alt="AadhiGuru Software Poster" className="software-poster-img" />
+              <div className="poster-glow"></div>
             </div>
           </div>
         </div>
@@ -82,8 +44,8 @@ const Software = () => {
       {/* Features Section */}
       <section id="features" className="software-features section bg-surface">
         <div className="container">
-          <h2 className="section-title">Why Choose AadhiGuru Pro?</h2>
-          <p className="section-subtitle">Engineered for Accuracy & Speed</p>
+          <h2 className="section-title">Professional Tools, Now in Your Pocket</h2>
+          <p className="section-subtitle">The same precision you trust, enhanced with mobile mobility</p>
           
           <div className="features-grid">
             <div className="feature-card">
@@ -119,10 +81,9 @@ const Software = () => {
           </div>
         </div>
       </section>
-
-
     </div>
   );
 };
 
 export default Software;
+

@@ -62,6 +62,15 @@ const INITIAL_PRODUCTS = [
     seller: 'AadhiGuru',
   },
   {
+    id: 9, category: 'Software',
+    name: 'AadhiGuru Pro Studio', name_ta: 'ஆதிகுரு ப்ரோ ஸ்டுடியோ',
+    price: 0, originalPrice: 9999, rating: 4.9, reviews: 542,
+    emoji: '💻', badge: 'App Exclusive',
+    description: 'Professional astrology studio. Now exclusive for app users.',
+    seller: 'AadhiGuru',
+    isAppExclusive: true,
+  },
+  {
     id: 8, category: 'Yoga',
     name: 'Pranayama Instruction Cards', name_ta: 'பிரணாயாம அட்டைகள்',
     price: 149, originalPrice: 249, rating: 4.3, reviews: 44,
@@ -71,7 +80,7 @@ const INITIAL_PRODUCTS = [
   },
 ];
 
-const CATEGORIES = ['All', 'Astrology', 'Puja', 'Yoga', 'Acupuncture', 'Vastu'];
+const CATEGORIES = ['All', 'Astrology', 'Software', 'Puja', 'Yoga', 'Acupuncture', 'Vastu'];
 const SORT_OPTIONS = [
   { value: 'popular', label: 'Most Popular' },
   { value: 'price_asc', label: 'Price: Low to High' },
@@ -293,24 +302,39 @@ const Store = () => {
                     <Stars rating={product.rating} />
                     <span className="review-count">({product.reviews})</span>
                   </div>
-                  <div className="product-price-row">
-                    <span className="product-price">₹{product.price.toLocaleString()}</span>
-                    {product.originalPrice > product.price && (
-                      <>
-                        <span className="product-original">₹{product.originalPrice.toLocaleString()}</span>
-                        <span className="product-discount">{discount(product.originalPrice, product.price)}% off</span>
-                      </>
-                    )}
-                  </div>
-                  <p className="product-seller">Sold by: {product.seller}</p>
+                <div className="product-price-row">
+                  {product.isAppExclusive ? (
+                    <span className="product-price free-text">FREE for App Users</span>
+                  ) : (
+                    <>
+                      <span className="product-price">₹{product.price.toLocaleString()}</span>
+                      {product.originalPrice > product.price && (
+                        <>
+                          <span className="product-original">₹{product.originalPrice.toLocaleString()}</span>
+                          <span className="product-discount">{discount(product.originalPrice, product.price)}% off</span>
+                        </>
+                      )}
+                    </>
+                  )}
                 </div>
+                <p className="product-seller">Sold by: {product.seller}</p>
+              </div>
+              {product.isAppExclusive ? (
+                <button
+                  className="add-to-cart-btn app-btn"
+                  onClick={() => navigate('/software')}
+                >
+                  📱 View Software
+                </button>
+              ) : (
                 <button
                   className={`add-to-cart-btn ${addedId === product.id ? 'added' : ''}`}
                   onClick={() => addToCart(product)}
                 >
                   {addedId === product.id ? '✓ Added!' : '🛒 Add to Cart'}
                 </button>
-              </div>
+              )}
+            </div>
             ))}
           </div>
         )}

@@ -358,6 +358,14 @@
   color: var(--color-primary);
 }
 
+.product-price.free-text {
+  color: #16a34a;
+  font-size: 1rem;
+  background: rgba(22, 163, 74, 0.08);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+}
+
 .product-original {
   font-size: 0.85rem;
   color: var(--color-text-muted);
@@ -390,6 +398,16 @@
 
 .add-to-cart-btn:hover { background: var(--color-primary-hover); }
 .add-to-cart-btn.added { background: #16a34a; }
+
+.add-to-cart-btn.app-btn {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+.add-to-cart-btn.app-btn:hover {
+  background: #0f172a;
+  color: white;
+}
 
 /* ── Empty State ─────────────────────────────────────────── */
 .empty-state {
