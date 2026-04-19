@@ -106,9 +106,15 @@ const Header = () => {
                   <Link to="/dashboard" className="dropdown-item">
                     <span className="dropdown-icon">📋</span> My Bookings
                   </Link>
+                  {user.email === 'aadhiguru.com@gmail.com' && (
+                    <Link to="/admin" className="dropdown-item">
+                      <span className="dropdown-icon">📈</span> Admin Dashboard
+                    </Link>
+                  )}
                   <Link to="/profile" className="dropdown-item">
                     <span className="dropdown-icon">⚙️</span> Profile Settings
                   </Link>
+
                   <div className="dropdown-divider"></div>
                   <button 
                     onClick={() => {
@@ -196,6 +202,12 @@ const Header = () => {
               <Link to="/dashboard" className="drawer-link" onClick={() => setMenuOpen(false)}>
                  <span className="drawer-link-icon">📋</span> My Bookings
               </Link>
+              {user.email === 'aadhiguru.com@gmail.com' && (
+                <Link to="/admin" className="drawer-link" onClick={() => setMenuOpen(false)}>
+                  <span className="drawer-link-icon">📈</span> Admin Dashboard
+                </Link>
+              )}
+
               <button 
                 onClick={() => { 
                   supabase.auth.signOut(); 

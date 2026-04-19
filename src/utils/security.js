@@ -28,12 +28,18 @@ export const validatePhone = (phone) => {
 
 /**
  * Validates email format.
- * @param {string} email 
- * @returns {boolean}
+ * Robust email regex for validation
  */
 export const validateEmail = (email) => {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return re.test(email);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+/* 
+ * Security Helper to check if the current user has high-level administrative access.
+ * This is hardcoded to the primary author's email as requested.
+ */
+export const isAdminUser = (user) => {
+  return user?.email === 'aadhiguru.com@gmail.com';
 };
 
 /**

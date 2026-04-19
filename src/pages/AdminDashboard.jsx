@@ -10,7 +10,9 @@ const AdminDashboard = () => {
 
   const fetchBookings = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    
+    // Strict Admin Email Check
+    if (!session || session.user?.email !== 'aadhiguru.com@gmail.com') {
       window.location.href = '/login';
       return;
     }
@@ -18,14 +20,14 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.from('bookings').select('*').order('created_at', { ascending: false });
-      if (!error && data) {
-        setBookings(data);
-      }
+      if (error) throw error;
+      setBookings(data || []);
     } catch (err) {
       console.error(err);
     }
     setLoading(false);
   };
+
 
   useEffect(() => {
     fetchBookings();

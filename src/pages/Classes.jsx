@@ -29,6 +29,7 @@ const Classes = () => {
   });
   
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAuthoritativeAdmin, setIsAuthoritativeAdmin] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [enrollingClass, setEnrollingClass] = useState(null);
   
@@ -43,13 +44,29 @@ const Classes = () => {
   const [newDate, setNewDate] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newThumbnail, setNewThumbnail] = useState('');
-
+ 
   useEffect(() => {
+    // Check if current user is the authoritative admin
+    const checkAdmin = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email === 'aadhiguru.com@gmail.com') {
+        setIsAuthoritativeAdmin(true);
+      } else {
+        setIsAuthoritativeAdmin(false);
+        setIsAdmin(false); // Force exit admin mode if not admin
+      }
+    };
+    checkAdmin();
+    
     localStorage.setItem('aadhiguru_classes', JSON.stringify(classes));
   }, [classes]);
 
   const handleAddClass = (e) => {
     e.preventDefault();
+    if (!isAuthoritativeAdmin) {
+      alert("Unauthorized: You do not have permission to manage classes.");
+      return;
+    }
     if (!newTitleEn || !newDate || !newPrice) return;
     
     const newClass = {
@@ -67,6 +84,7 @@ const Classes = () => {
   };
 
   const handleRemoveClass = (id) => {
+    if (!isAuthoritativeAdmin) return;
     setClasses(classes.filter(c => c.id !== id));
   };
 
@@ -115,16 +133,19 @@ const Classes = () => {
             <h2 className="section-title" style={{ textAlign: 'left', marginBottom: '0.5rem' }}>Astrology, Vastu & Education</h2>
             <p className="section-subtitle" style={{ textAlign: 'left', marginBottom: '2rem' }}>Learn from our Gurus & Mentors | எங்களின் நிபுணர்களிடம் கற்கவும்</p>
           </div>
-          <button 
-            className={`admin-toggle ${isAdmin ? 'active' : ''}`} 
-            onClick={() => setIsAdmin(!isAdmin)}
-          >
-            {isAdmin ? 'Exit Admin Mode' : 'Admin Mode'}
-          </button>
+          {isAuthoritativeAdmin && (
+            <button 
+              className={`admin-toggle ${isAdmin ? 'active' : ''}`} 
+              onClick={() => setIsAdmin(!isAdmin)}
+            >
+              {isAdmin ? 'Exit Admin Mode' : 'Admin Mode'}
+            </button>
+          )}
         </div>
 
-        {isAdmin && (
+        {isAdmin && isAuthoritativeAdmin && (
           <div className="admin-panel mb-4">
+
             <h3>Add New Class | புதிய வகுப்பு</h3>
             <form className="admin-form" onSubmit={handleAddClass}>
               <div className="form-row">
