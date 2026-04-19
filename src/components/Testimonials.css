@@ -110,5 +110,6 @@
 @media (max-width: 600px) {
   .testimonial-card {
     padding: 2rem 1.5rem;
+    flex: 0 0 85vw;
   }
 }

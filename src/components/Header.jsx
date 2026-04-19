@@ -60,7 +60,7 @@ const Header = () => {
 
           {/* ── Logo ── */}
           <Link to="/" className="logo-link" onClick={() => setMenuOpen(false)}>
-            <img src="/images/logo final.png" alt="Sri AadhiGuru Education" className="site-logo" />
+            <img src="/images/logo-final.png" alt="Sri AadhiGuru Education" className="site-logo" />
             <div className="logo-text-block">
               <span className="logo-name">Sri AadhiGuru</span>
               <span className="logo-sub">Education | ஸ்ரீ ஆதிகுரு கல்வி</span>
@@ -124,6 +124,9 @@ const Header = () => {
                 Login / Sign Up
               </Link>
             )}
+            <Link to="/contact" className="btn btn-primary" style={{marginLeft: '15px', padding: '0.5rem 1.25rem', fontSize: '0.9rem', width: 'auto', borderRadius: '4px'}}>
+              Contact Us
+            </Link>
           </nav>
 
           {/* ── Hamburger ── */}
@@ -145,7 +148,7 @@ const Header = () => {
       <div className={`mobile-drawer ${menuOpen ? 'drawer-open' : ''}`} aria-hidden={!menuOpen}>
         <div className="drawer-header">
           <Link to="/" className="logo-link drawer-logo" onClick={() => setMenuOpen(false)}>
-            <img src="/images/logo final.png" alt="Logo" className="site-logo" />
+            <img src="/images/logo-final.png" alt="Logo" className="site-logo" />
             <div className="logo-text-block">
               <span className="logo-name">Sri AadhiGuru</span>
               <span className="logo-sub">Education</span>
@@ -203,6 +206,9 @@ const Header = () => {
               👤 Login / Sign Up
             </Link>
           )}
+          <Link to="/contact" className="btn btn-primary w-100" onClick={() => setMenuOpen(false)} style={{ textAlign: 'center', marginTop: '1rem', borderRadius: '4px' }}>
+             Contact Us
+          </Link>
           <p className="drawer-tagline">🕉️ Vedic · Authentic · Trusted</p>
         </div>
       </div>

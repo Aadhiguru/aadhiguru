@@ -13,19 +13,11 @@ const Software = () => {
             <div className="badge-exclusive">App Exclusive ✦</div>
             <h1 className="software-title">AadhiGuru Pro Astrology Studio</h1>
             <p className="software-subtitle">
-              The ultimate high-precision astrology desktop & mobile powerhouse. Now integrated exclusively within the AadhiGuru Ecosystem. Not available for individual sale.
+              The ultimate high-precision astrology desktop & mobile powerhouse. Now integrated exclusively within the AadhiGuru Ecosystem.
             </p>
-            
-            <div className="not-for-sale-box">
-              <span className="info-icon">ℹ️</span>
-              <div>
-                <strong>Not for Sale</strong>
-                <p>This software is now a complimentary part of our mobile app experience.</p>
-              </div>
-            </div>
 
             <div className="hero-actions">
-              <button className="btn btn-primary btn-glow" onClick={() => window.open('#', '_blank')}>
+              <button className="btn btn-primary btn-glow" onClick={() => window.open('https://play.google.com/store/apps/details?id=co.jones.ctqok&pcampaignid=web_share', '_blank')}>
                 📱 Get the App
               </button>
               <a href="#features" className="btn btn-outline-white">Explore Features</a>

@@ -42,6 +42,8 @@ const UserDashboard = () => {
             setBookings(prev => [payload.new, ...prev]);
           } else if (payload.eventType === 'UPDATE') {
             setBookings(prev => prev.map(b => b.id === payload.new.id ? payload.new : b));
+          } else if (payload.eventType === 'DELETE') {
+            setBookings(prev => prev.filter(b => b.id !== payload.old.id));
           }
         }
       )
@@ -51,6 +53,20 @@ const UserDashboard = () => {
       supabase.removeChannel(channel);
     };
   }, [userPhone]);
+
+  const handleCancelBooking = async (bookingId) => {
+    if (!window.confirm("Are you sure you want to cancel and delete this booking request?")) return;
+    
+    const { error } = await supabase
+      .from('bookings')
+      .delete()
+      .eq('id', bookingId);
+
+    if (error) {
+      alert("Failed to cancel booking. Please try again.");
+      console.error(error);
+    }
+  };
 
   if (loading) return <div className="loading-state">Loading your dashboard...</div>;
 
@@ -100,9 +116,18 @@ const UserDashboard = () => {
                     </div>
                     <div className="card-footer">
                       {booking.status === 'pending' && (
-                        <div className="pending-notice">
-                          <span className="spinner"></span>
-                          Waiting for Master's approval...
+                        <div className="pending-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: '1rem' }}>
+                          <div className="pending-notice" style={{ margin: 0 }}>
+                            <span className="spinner"></span>
+                            Waiting for Master's approval...
+                          </div>
+                          <button 
+                            className="btn btn-outline" 
+                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', color: '#ef4444', borderColor: '#ef4444' }}
+                            onClick={() => handleCancelBooking(booking.id)}
+                          >
+                            Cancel Request
+                          </button>
                         </div>
                       )}
                       {booking.status === 'accepted' && booking.payment_status === 'unpaid' && (

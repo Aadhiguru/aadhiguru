@@ -1,6 +1,33 @@
+import { useState } from 'react';
 import './Contact.css';
 
 const Contact = () => {
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
+
+  const validateEmail = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+    
+    // Regex for robust email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (value && !emailRegex.test(value)) {
+      setEmailError('Please enter a valid email address (e.g. name@example.com)');
+    } else {
+      setEmailError('');
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (emailError) {
+      alert('Please fix the invalid email address before submitting.');
+      return;
+    }
+    alert('Thank you! Your message has been sent.');
+  };
+
   return (
     <div className="contact-page">
       <section className="section bg-surface">
@@ -14,7 +41,18 @@ const Contact = () => {
                 <span className="method-icon">📍</span>
                 <div className="method-content">
                   <h3>Visit Our Office</h3>
-                  <p><strong>Head Office:</strong> 48/29, N Mada St, near masilamanieswarar temple, near EB office, Thirumullaivoyal, Chennai, Tamil Nadu 600062</p>
+                  <p>
+                    <strong>Head Office:</strong>{' '}
+                    <a 
+                      href="https://maps.app.goo.gl/LtSZq5DkLmreJyEZ7" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ color: 'inherit', textDecoration: 'underline', textDecorationColor: 'var(--color-primary)', textUnderlineOffset: '3px' }}
+                      title="Open in Google Maps"
+                    >
+                      48/29, N Mada St, near masilamanieswarar temple, near EB office, Thirumullaivoyal, Chennai, Tamil Nadu 600062
+                    </a>
+                  </p>
                 </div>
               </div>
 
@@ -39,14 +77,23 @@ const Contact = () => {
 
             <div className="contact-form-container">
               <h3>Send a Message</h3>
-              <form className="contact-form" onSubmit={(e) => { e.preventDefault(); alert('Thank you! Your message has been sent.'); }}>
+              <form className="contact-form" onSubmit={handleSubmit} noValidate>
                 <div className="form-group">
                   <label>Full Name</label>
                   <input type="text" placeholder="Your Name" required />
                 </div>
                 <div className="form-group">
                   <label>Email Address</label>
-                  <input type="email" placeholder="Your Email" required />
+                  <input 
+                    type="email" 
+                    placeholder="name@example.com" 
+                    value={email}
+                    onChange={validateEmail}
+                    className={emailError ? 'input-error' : ''}
+                    style={emailError ? { borderColor: '#ef4444', outlineColor: '#ef4444' } : {}}
+                    required 
+                  />
+                  {emailError && <span style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '4px', display: 'block' }}>{emailError}</span>}
                 </div>
                 <div className="form-group">
                   <label>Subject</label>
@@ -62,7 +109,7 @@ const Contact = () => {
                   <label>Message</label>
                   <textarea rows="5" placeholder="How can we help you?" required></textarea>
                 </div>
-                <button type="submit" className="btn btn-primary w-100">Send Message</button>
+                <button type="submit" className="btn btn-primary w-100" disabled={!!emailError}>Send Message</button>
               </form>
             </div>
           </div>
@@ -70,7 +117,6 @@ const Contact = () => {
       </section>
 
       <section className="map-section">
-        {/* Mock Map Placeholder with neat styling */}
         <div className="mock-map">
           <div className="map-info">
             <h4>Location Highlight</h4>

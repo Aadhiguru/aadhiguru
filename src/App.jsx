@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import Intro from './components/Intro';
 import Home from './pages/Home';
 import Classes from './pages/Classes';
 import Contact from './pages/Contact';
@@ -18,11 +19,13 @@ import PaymentPage from './pages/PaymentPage';
 import UserDashboard from './pages/UserDashboard';
 import Checkout from './pages/Checkout';
 import ProfileSettings from './pages/ProfileSettings';
-
+import Terms from './pages/Terms';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 function App() {
   return (
     <Router>
       <div className="app-container">
+        <Intro />
         <Header />
         <Routes>
           <Route path="/" element={<Home />} />
@@ -42,6 +45,8 @@ function App() {
           <Route path="/pay" element={<PaymentPage />} />
           <Route path="/dashboard" element={<UserDashboard />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
         </Routes>
         <Footer />
       </div>

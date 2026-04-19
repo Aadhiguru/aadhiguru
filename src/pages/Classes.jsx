@@ -33,6 +33,7 @@ const Classes = () => {
   // Success Modal State
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('card');
   
   // New Class State
   const [newTitleEn, setNewTitleEn] = useState('');
@@ -76,6 +77,7 @@ const Classes = () => {
     } else {
       // Premium paid flow
       setEnrollingClass(cls);
+      setPaymentMethod('card');
       setShowModal(true);
     }
   };
@@ -185,27 +187,63 @@ const Classes = () => {
                 </div>
               </div>
               
+              <div className="payment-method-toggle">
+                <button 
+                  className={`method-btn ${paymentMethod === 'card' ? 'active' : ''}`}
+                  onClick={() => setPaymentMethod('card')}
+                >
+                  💳 Card
+                </button>
+                <button 
+                  className={`method-btn ${paymentMethod === 'upi' ? 'active' : ''}`}
+                  onClick={() => setPaymentMethod('upi')}
+                >
+                  📱 UPI
+                </button>
+              </div>
+              
               <div className="payment-form">
-                <div className="input-group">
-                  <label>Cardholder Name</label>
-                  <input type="text" placeholder="e.g. John Doe" defaultValue="Demo User" />
-                </div>
-                
-                <div className="input-group">
-                  <label>Card Number</label>
-                  <input type="text" placeholder="XXXX XXXX XXXX XXXX" defaultValue="XXXX XXXX XXXX XXXX" />
-                </div>
-                
-                <div className="form-row">
-                  <div className="input-group">
-                    <label>Expiry (MM/YY)</label>
-                    <input type="text" placeholder="MM/YY" defaultValue="12/26" />
+                {paymentMethod === 'card' ? (
+                  <>
+                    <div className="input-group">
+                      <label>Cardholder Name</label>
+                      <input type="text" placeholder="e.g. John Doe" defaultValue="Demo User" />
+                    </div>
+                    
+                    <div className="input-group">
+                      <label>Card Number</label>
+                      <input type="text" placeholder="XXXX XXXX XXXX XXXX" defaultValue="XXXX XXXX XXXX XXXX" />
+                    </div>
+                    
+                    <div className="form-row">
+                      <div className="input-group">
+                        <label>Expiry (MM/YY)</label>
+                        <input type="text" placeholder="MM/YY" defaultValue="12/26" />
+                      </div>
+                      <div className="input-group">
+                        <label>Security Code</label>
+                        <input type="text" placeholder="CVC" defaultValue="123" />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="upi-payment-section">
+                    <div className="input-group">
+                      <label>Enter your UPI ID</label>
+                      <input type="text" placeholder="username@ybl" />
+                    </div>
+                    <div className="upi-divider">
+                      <span>OR</span>
+                    </div>
+                    <div className="upi-qr-placeholder">
+                      <div className="mock-qr-code">
+                        <span style={{ fontSize: '3.5rem', lineHeight: 1 }}>🔲</span>
+                        <p>Scan with any UPI app</p>
+                      </div>
+                      <p className="upi-apps">GPay · PhonePe · Paytm · BHIM</p>
+                    </div>
                   </div>
-                  <div className="input-group">
-                    <label>Security Code</label>
-                    <input type="text" placeholder="CVC" defaultValue="123" />
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className="modal-actions">

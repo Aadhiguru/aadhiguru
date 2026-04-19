@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const Footer = () => {
@@ -7,7 +8,7 @@ const Footer = () => {
         <div className="footer-grid">
           <div className="footer-col">
             <div className="footer-logo-container">
-              <img src="/images/logo.png" alt="Sri AadhiGuru Logo" className="footer-site-logo" />
+              <img src="/images/logo-final.png" alt="Sri AadhiGuru Logo" className="footer-site-logo" />
               <h4 className="footer-logo">Sri AadhiGuru Education</h4>
             </div>
             <p className="footer-desc">
@@ -17,9 +18,9 @@ const Footer = () => {
           <div className="footer-col">
             <h4 className="footer-heading">Quick Links</h4>
             <ul className="footer-links">
-              <li><a href="#home">Home</a></li>
-              <li><a href="#services">Services</a></li>
-              <li><a href="#contact">Contact Us</a></li>
+              <li><Link to="/">Home</Link></li>
+              <li><a href="/#services">Services</a></li>
+              <li><Link to="/contact">Contact Us</Link></li>
             </ul>
           </div>
           <div className="footer-col">
@@ -33,8 +34,12 @@ const Footer = () => {
             </address>
           </div>
         </div>
-        <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} AadhiGuru.</p>
+        <div className="footer-bottom" style={{display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center', borderTop: '1px solid var(--color-border)', paddingTop: '1.5rem', marginTop: '2rem'}}>
+          <p style={{margin: 0}}>&copy; {new Date().getFullYear()} AadhiGuru. All rights reserved.</p>
+          <div className="footer-legal-links" style={{display: 'flex', gap: '1.5rem', marginTop: '1rem'}}>
+            <Link to="/terms" style={{color: 'var(--color-text-muted)', fontSize: '0.9rem', textDecoration: 'none'}}>Terms & Conditions</Link>
+            <Link to="/privacy" style={{color: 'var(--color-text-muted)', fontSize: '0.9rem', textDecoration: 'none'}}>Privacy Policy</Link>
+          </div>
         </div>
       </div>
     </footer>
