@@ -9,16 +9,18 @@ const UserDashboard = () => {
   const userPhone = localStorage.getItem('userPhone');
 
   useEffect(() => {
-    if (!userPhone) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchBookings = async () => {
+    const initFetch = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = '/login';
+        return;
+      }
+      
+      const email = session.user.email;
       const { data, error } = await supabase
         .from('bookings')
         .select('*')
-        .eq('phone_number', userPhone)
+        .eq('phone_number', userPhone) // The logic uses phone_number in the DB currently
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -29,10 +31,11 @@ const UserDashboard = () => {
       setLoading(false);
     };
 
-    fetchBookings();
+    initFetch();
 
     // Set up realtime subscription for updates
-    const channel = supabase.channel('user-bookings')
+    if (userPhone) {
+      const channel = supabase.channel('user-bookings')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'bookings', filter: `phone_number=eq.${userPhone}` },
@@ -49,9 +52,10 @@ const UserDashboard = () => {
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [userPhone]);
 
   const handleCancelBooking = async (bookingId) => {

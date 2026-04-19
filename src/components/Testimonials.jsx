@@ -59,7 +59,7 @@ const Testimonials = () => {
   }, [isPaused]);
 
   return (
-    <section className="section bg-bg testimonials-section">
+    <section className="section bg-surface testimonials-section">
       <div className="container">
         <h2 className="section-title">What Our Clients Say | வாடிக்கையாளர் மதிப்புரைகள்</h2>
         <p className="section-subtitle">Real Stories of Transformation</p>

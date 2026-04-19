@@ -1,5 +1,7 @@
 .bg-surface {
   background-color: var(--color-surface);
+  background-image: radial-gradient(var(--color-border) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 .category-filter {
@@ -11,7 +13,7 @@
 }
 
 .filter-btn {
-  padding: 1rem 2rem;
+  padding: 1.5rem 2.5rem; /* Bigger buttons */
   background: white;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -19,20 +21,19 @@
   flex-direction: column;
   align-items: center;
   cursor: pointer;
-  min-width: 160px;
+  min-width: 200px;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.filter-btn .btn-en {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--color-text);
-  margin-bottom: 0.2rem;
+.btn-en {
+  font-weight: 800;
+  font-size: 1.2rem;
+  margin-bottom: 4px;
 }
 
-.filter-btn .btn-ta {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
+.btn-ta {
+  font-size: 0.9rem;
+  opacity: 0.8;
 }
 
 .filter-btn:hover {
@@ -67,39 +68,48 @@
   }
 }
 
+#services.section {
+  padding: 8rem 0;
+}
+
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2.5rem;
+  margin-top: 3rem;
 }
 
 .service-card {
-  background-color: var(--color-bg);
-  border-radius: var(--radius-lg);
-  padding: 2.5rem 2rem;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border: 1px solid var(--color-border);
-  text-align: center;
   position: relative;
+  background-color: #0f172a;
+  border-radius: 24px;
   overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  min-height: 460px;
+  height: 100%; /* Ensure card takes full grid height */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.service-card::before {
+.service-card::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background-color: var(--color-secondary);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s ease;
+  inset: 0;
+  background: linear-gradient(to top, 
+    rgba(0, 0, 0, 0.95) 0%, 
+    rgba(0, 0, 0, 0.6) 30%, 
+    rgba(0, 0, 0, 0.2) 60%,
+    transparent 100%
+  );
+  z-index: 1;
 }
 
 .service-card:hover {
-  transform: translateY(-10px) scale(1.02);
-  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.1), 0 0 20px rgba(243, 141, 62, 0.2);
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 15px rgba(243, 141, 62, 0.2);
   border-color: var(--color-secondary);
 }
 
@@ -108,127 +118,89 @@
 }
 
 .service-icon {
-  font-size: 2.5rem;
-  margin-bottom: 1.5rem;
-  display: inline-flex;
+  width: 72px;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 18px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 80px;
-  height: 80px;
-  background-color: rgba(243, 141, 62, 0.1);
-  border-radius: var(--radius-full);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-size: 2.5rem;
+  margin: 2.5rem auto 2rem; /* Added top margin since card padding is 0 */
+  position: relative;
+  z-index: 2;
+  transition: all 0.4s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .service-card:hover .service-icon {
-  transform: scale(1.15) rotate(5deg);
-  background-color: var(--color-secondary);
-  color: white;
-  box-shadow: 0 10px 15px rgba(243, 141, 62, 0.3);
+  transform: translateY(-5px) rotate(8deg);
+  background: rgba(243, 141, 62, 0.25);
+  border-color: rgba(243, 141, 62, 0.5);
+  box-shadow: 0 12px 40px rgba(243, 141, 62, 0.3);
 }
 
 .service-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: var(--color-text);
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  color: #ffffff;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  letter-spacing: -0.02em;
+  text-align: center;
+  padding: 0 1.5rem;
 }
 
 .service-desc {
-  color: var(--color-text-muted);
-  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1rem;
   line-height: 1.6;
-}
-
-/* Card Overlay Features */
-.card-overlay {
-  position: absolute;
-  top: auto;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: auto;
-  min-height: 80%;
-  background: rgba(253, 251, 247, 0.98);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 2;
+  margin-bottom: 2rem;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  padding: 0 1.5rem;
+  flex-grow: 1; /* Pushes the footer to the bottom */
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 2rem 1.5rem;
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card-footer {
+  margin-top: auto;
+  position: relative;
   z-index: 5;
-  transform: translateY(100%);
-  border-top: 1px solid rgba(243, 141, 62, 0.2);
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
-  box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.05);
-}
-
-.service-card:hover .card-overlay {
-  transform: translateY(0);
-}
-
-.overlay-title {
-  color: var(--color-primary);
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.benefits-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 1.5rem 0;
-  text-align: center;
   width: 100%;
+  padding: 1.5rem; /* Re-apply padding only to footer area */
+  border: none !important;
+  background: none !important;
 }
 
-.benefits-list li {
-  margin-bottom: 0.6rem;
-  font-weight: 500;
-  color: var(--color-text);
-  font-size: 0.95rem;
+.book-btn-v2 {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-radius: 12px;
+  background: var(--gradient-primary);
+  color: white !important;
+  box-shadow: 0 8px 20px rgba(31, 138, 112, 0.3);
+  margin: 0;
+  border: none;
+  transition: all 0.3s ease;
 }
 
-.benefits-list li::before {
-  content: '✦';
-  color: var(--color-secondary);
-  font-size: 0.8rem;
-}
 
-.cta-btn {
-  padding: 0.6rem 1.75rem;
-  font-size: 0.95rem;
-  letter-spacing: 0.5px;
-}
-
-.overlay-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  width: 100%;
-}
-
-.overlay-actions .btn {
-  width: 100%;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  line-height: 1.2;
-}
-
-.text-xs {
-  font-size: 0.75rem;
-  font-weight: 500;
-  opacity: 0.9;
-}
 
 /* Premium Booking Modal Styles */
 .modal-overlay {
@@ -477,8 +449,5 @@ html.dark .form-group input.disabled-input {
     width: 100%;
     min-width: 100%;
     padding: 0.75rem 1rem;
-  }
-  .service-card {
-    padding: 2rem 1.25rem;
   }
 }

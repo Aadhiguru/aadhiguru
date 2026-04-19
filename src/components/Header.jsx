@@ -111,7 +111,10 @@ const Header = () => {
                   </Link>
                   <div className="dropdown-divider"></div>
                   <button 
-                    onClick={() => supabase.auth.signOut()} 
+                    onClick={() => {
+                      supabase.auth.signOut();
+                      localStorage.removeItem('userPhone');
+                    }} 
                     className="dropdown-item logout-item"
                   >
                     <span className="dropdown-icon">🚪</span> Sign Out
@@ -194,7 +197,11 @@ const Header = () => {
                  <span className="drawer-link-icon">📋</span> My Bookings
               </Link>
               <button 
-                onClick={() => { supabase.auth.signOut(); setMenuOpen(false); }} 
+                onClick={() => { 
+                  supabase.auth.signOut(); 
+                  localStorage.removeItem('userPhone');
+                  setMenuOpen(false); 
+                }} 
                 className="drawer-link" 
                 style={{color: '#ef4444', border: 'none', background: 'transparent', textAlign: 'left', padding: '0.85rem 1.1rem', cursor: 'pointer', fontFamily: 'inherit'}}
               >

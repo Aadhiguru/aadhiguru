@@ -66,33 +66,30 @@
 }
 
 .class-card {
-  background-color: white;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--color-border);
+  position: relative;
+  background-color: #0f172a;
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
-  transition: var(--transition);
-  overflow: hidden;
+  padding: 0;
+  height: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .class-thumbnail {
   width: 100%;
-  height: 220px;
+  height: 200px;
   overflow: hidden;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-surface); /* placeholder color before loading */
-}
-
-.class-thumbnail img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  background: linear-gradient(135deg, rgba(31, 138, 112, 0.2), rgba(15, 23, 42, 0.5));
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .class-card:hover .class-thumbnail img {
-  transform: scale(1.08); /* Premium slow zoom effect */
+  transform: scale(1.1) rotate(2deg);
 }
 
 .class-card:hover {
@@ -107,10 +104,11 @@
 }
 
 .class-title-en {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-text);
-  margin-bottom: 0.25rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
 }
 
 .class-title-ta {
@@ -120,20 +118,21 @@
 }
 
 .class-details p {
-  margin-bottom: 0.5rem;
-  color: var(--color-text-muted);
+  margin-bottom: 0.6rem;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: space-between;
 }
 
 .class-details strong {
-  color: var(--color-text);
+  color: var(--color-secondary);
+  font-weight: 600;
 }
 
 .class-actions {
   padding: 1.5rem 2rem;
-  border-top: 1px solid var(--color-border);
-  background-color: var(--color-bg);
-  border-bottom-left-radius: var(--radius-lg);
-  border-bottom-right-radius: var(--radius-lg);
+  background-color: rgba(255, 255, 255, 0.03);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .w-100 {

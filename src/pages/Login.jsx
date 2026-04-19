@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import './Login.css';
 
@@ -21,6 +21,7 @@ const EyeIcon = ({ show }) => (
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLogin, setIsLogin] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -33,6 +34,15 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [notification, setNotification] = useState(null);
+
+  useEffect(() => {
+    // Force scroll to top so the user always sees the notification/header
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    if (location.state?.message) {
+      showNotification('info', location.state.message);
+    }
+  }, [location]);
 
   const showNotification = (type, message) => {
     setNotification({ type, message });
@@ -172,7 +182,7 @@ const Login = () => {
       <div className="login-container">
         {notification && (
           <div className={`custom-notification ${notification.type}`}>
-            <span className="notif-icon">{notification.type === 'error' ? '⚠️' : '✅'}</span>
+            <span className="notif-icon">{notification.type === 'error' ? '⚠️' : (notification.type === 'info' ? 'ℹ️' : '✅')}</span>
             <span className="notif-text">{notification.message}</span>
             <button className="notif-close" type="button" onClick={() => setNotification(null)}>✕</button>
           </div>

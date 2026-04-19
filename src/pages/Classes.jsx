@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../supabaseClient';
 import './Classes.css';
 import SuccessModal from '../components/SuccessModal';
 
@@ -68,7 +70,16 @@ const Classes = () => {
     setClasses(classes.filter(c => c.id !== id));
   };
 
-  const handleEnrollClick = (cls) => {
+  const navigate = useNavigate();
+
+  const handleEnrollClick = async (cls) => {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      navigate('/login', { state: { message: `Please login or sign up to enroll in ${cls.title_en}.` } });
+      return;
+    }
+
     if (cls.price === 0) {
       // Free consultation flow
       setEnrollingClass(cls);

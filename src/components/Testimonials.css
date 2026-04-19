@@ -38,6 +38,13 @@
   flex-direction: column;
 }
 
+:root[data-theme="dark"] .testimonial-card,
+html.dark .testimonial-card {
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.02);
+}
+
 .testimonial-card:hover {
   transform: translateY(-10px) scale(1.02);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 0 20px rgba(31, 138, 112, 0.15);

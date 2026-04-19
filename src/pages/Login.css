@@ -303,6 +303,12 @@
   color: #15803d;
 }
 
+.custom-notification.info {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+}
+
 .notif-icon {
   font-size: 1.25rem;
 }

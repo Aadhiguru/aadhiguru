@@ -6,42 +6,45 @@ const Intro = () => {
   const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
-    // Keep intro on screen for 2.6 seconds, then start left/right split out
+    // Show splash for 3 seconds before starting fade-out
     const timer = setTimeout(() => {
-      setExiting(true);
-    }, 2600);
+    setExiting(true);
+    }, 3000);
 
     // Completely unmount after transition completes
     const removeTimer = setTimeout(() => {
-      setShow(false);
+    setShow(false);
     }, 4000);
 
     return () => {
-      clearTimeout(timer);
-      clearTimeout(removeTimer);
+    clearTimeout(timer);
+    clearTimeout(removeTimer);
     };
   }, []);
 
   if (!show) return null;
 
   return (
-    <div className={`intro-overlay ${exiting ? 'split-open' : ''}`}>
-      {/* Background doors that split left and right */}
-      <div className="intro-door left-door"></div>
-      <div className="intro-door right-door"></div>
-      
-      <div className="intro-content">
-        <div className="intro-logo-wrapper">
-          <div className="intro-logo-spinner">
-            <img src="/images/logo-final.png" alt="Sri AadhiGuru Preloader Logo" className="intro-logo" />
-          </div>
-        </div>
-        <div className="intro-text-row">
-           <h1 className="intro-title slide-from-left">Sri</h1>
-           <h1 className="intro-title slide-from-right">AadhiGuru</h1>
-        </div>
-        <p className="intro-subtitle">Vedic · Authentic · Trusted</p>
+    <div className={`vidya-intro-overlay ${exiting ? 'fade-out' : ''}`}>
+    
+    {/* Side Visuals like the reference site */}
+    <div className="vidya-side-visual left">
+      <img src="/images/bg_astrology_new.png" alt="" />
+    </div>
+    <div className="vidya-side-visual right">
+      <img src="/images/bg_yoga.png" alt="" />
+    </div>
+
+    <div className="vidya-intro-container">
+      <div className="vidya-logo-frame">
+      <div className="vidya-orbit-ring"></div>
+      <div className="vidya-orbit-ring inner"></div>
+      <img src="/images/intro_wheel.png" alt="Sri AadhiGuru Astrology Wheel" className="vidya-logo-img wheel-style" />
       </div>
+      <div className="vidya-loading-text">
+      SRI AADHIGURU EDUCATION
+      </div>
+    </div>
     </div>
   );
 };

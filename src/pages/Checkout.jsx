@@ -21,6 +21,13 @@ const Checkout = () => {
   });
 
   useEffect(() => {
+    // Check auth
+    const userPhone = localStorage.getItem('userPhone');
+    if (!userPhone) {
+      navigate('/login');
+      return;
+    }
+
     // Load cart from localStorage
     const saved = localStorage.getItem('aadhiguru_cart');
     if (saved) {

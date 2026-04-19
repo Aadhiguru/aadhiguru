@@ -521,9 +521,10 @@
 
 /* ── Responsive ────────────────────────────────────── */
 @media (max-width: 960px) {
-  .nav-desktop { gap: 0.1rem; }
-  .nav-link { padding: 0.4rem 0.55rem; font-size: 0.84rem; }
-  .nav-login-btn { padding: 0.5rem 1rem; font-size: 0.82rem; }
+  .nav-desktop { display: none !important; }
+  .hamburger { display: flex !important; }
+  .header-container { height: 62px; }
+  .site-logo { height: 38px; }
   .logo-name { font-size: 0.95rem; }
   .logo-sub { display: none; }
 }

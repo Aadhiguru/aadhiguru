@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { categories, allServices } from '../data/servicesData';
 import './ServicesGrid.css';
@@ -60,7 +60,16 @@ const ServicesGrid = () => {
     return slots;
   };
 
-  const handleBookClick = (service) => {
+  const navigate = useNavigate();
+
+  const handleBookClick = async (service) => {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      navigate('/login', { state: { message: `Please login or sign up to book ${service.title}.` } });
+      return;
+    }
+
     if (['tuition', 'extracurricular'].includes(service.category)) {
       setShowEducationAlert(true);
     } else {
@@ -204,23 +213,26 @@ const ServicesGrid = () => {
 
         <div className="services-grid">
           {filteredServices.map((service) => (
-            <div key={service.id} className="service-card animate-in">
+            <div 
+              key={service.id} 
+              className="service-card animate-in"
+              style={{
+                backgroundImage: `url(${service.bgImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
+            >
               <div className="service-icon">{service.icon}</div>
               <h3 className="service-title">{service.title}</h3>
               <p className="service-desc">{service.description}</p>
               
-              {/* Hover Benefits Overlay */}
-              <div className="card-overlay">
-                <h4 className="overlay-title">Key Benefits</h4>
-                <ul className="benefits-list">
-                  {service.benefits?.map((benefit, i) => (
-                    <li key={i}>{benefit}</li>
-                  ))}
-                </ul>
-                <div className="overlay-actions">
-                  <button className="btn btn-secondary cta-btn" onClick={() => handleBookClick(service)}>Book</button>
-                </div>
+              <div className="card-footer">
+                <button className="btn btn-secondary book-btn-v2" onClick={() => handleBookClick(service)}>
+                  Book Now | முன்பதிவு
+                </button>
               </div>
+              
+
             </div>
           ))}
         </div>

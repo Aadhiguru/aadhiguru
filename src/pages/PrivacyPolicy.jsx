@@ -1,6 +1,11 @@
+import { useEffect } from 'react';
 import './Legal.css';
 
 const PrivacyPolicy = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="legal-page">
       <div className="container">

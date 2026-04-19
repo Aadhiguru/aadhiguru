@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import './AppointmentForm.css';
 import SuccessModal from './SuccessModal';
@@ -25,8 +26,19 @@ const AppointmentForm = () => {
     }
   };
 
+  const navigate = useNavigate();
+
   const handleBooking = async (e) => {
     e.preventDefault();
+    
+    const userPhone = localStorage.getItem('userPhone');
+    if (!userPhone) {
+      if (window.confirm("You need to login or sign up to book an appointment. Proceed to Login?")) {
+        navigate('/login');
+      }
+      return;
+    }
+
     setLoading(true);
 
     try {

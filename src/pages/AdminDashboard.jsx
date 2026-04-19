@@ -9,6 +9,12 @@ const AdminDashboard = () => {
   // Active Bookings
 
   const fetchBookings = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = '/login';
+      return;
+    }
+    
     setLoading(true);
     try {
       const { data, error } = await supabase.from('bookings').select('*').order('created_at', { ascending: false });
