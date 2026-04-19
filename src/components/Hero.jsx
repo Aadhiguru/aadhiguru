@@ -47,7 +47,7 @@ const Hero = () => {
         </div>
         <div className="hero-image">
           <div className="image-frame">
-            <img src="/images/authorpicfinal.jpeg" alt="Author Portrait" />
+            <img src="/images/authorpicfinal.jpeg" alt="Author Portrait" fetchPriority="high" />
           </div>
         </div>
       </div>

@@ -60,7 +60,7 @@ const Header = () => {
 
           {/* ── Logo ── */}
           <Link to="/" className="logo-link" onClick={() => setMenuOpen(false)}>
-            <img src="/images/logo-final.png" alt="Sri AadhiGuru Education" className="site-logo" />
+            <img src="/images/logo-final.png" alt="Sri AadhiGuru Education" className="site-logo" fetchPriority="high" />
             <div className="logo-text-block">
               <span className="logo-name">Sri AadhiGuru</span>
               <span className="logo-sub">Education | ஸ்ரீ ஆதிகுரு கல்வி</span>
