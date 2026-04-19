@@ -265,7 +265,7 @@ const Login = () => {
 
           <div className="captcha-container" style={{ margin: '1rem 0', display: 'flex', justifyContent: 'center' }}>
             <HCaptcha
-              sitekey="10000000-ffff-ffff-ffff-000000000001" // Demo sitekey, replace with real one
+              sitekey={import.meta.env.VITE_HCAPTCHA_SITE_KEY || '10000000-ffff-ffff-ffff-000000000001'}
               onVerify={onCaptchaChange}
               ref={captchaRef}
               theme="dark"

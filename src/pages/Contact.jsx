@@ -136,7 +136,7 @@ const Contact = () => {
 
                 <div className="captcha-container" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
                   <HCaptcha
-                    sitekey="10000000-ffff-ffff-ffff-000000000001"
+                    sitekey={import.meta.env.VITE_HCAPTCHA_SITE_KEY || '10000000-ffff-ffff-ffff-000000000001'}
                     onVerify={onCaptchaChange}
                     ref={captchaRef}
                     theme="dark"
