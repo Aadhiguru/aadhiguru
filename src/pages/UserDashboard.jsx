@@ -1,13 +1,24 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import './UserDashboard.css';
 
 const UserDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.justLoggedIn) {
+      setShowWelcome(true);
+      setTimeout(() => setShowWelcome(false), 5000);
+      // Clean up state so it doesn't show again on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   useEffect(() => {
     const initFetch = async () => {
@@ -83,9 +94,26 @@ const UserDashboard = () => {
 
   return (
     <div className="dashboard-container">
+      {showWelcome && (
+        <div className="welcome-notification-success">
+          <div className="welcome-notif-content">
+            <span className="notif-check">✅</span>
+            <div className="notif-text-group">
+              <strong>Login Successful!</strong>
+              <p>Account created & verified. Welcome to Sri AadhiGuru Education.</p>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="container">
         <header className="dashboard-header">
-          <h1>My Bookings Dashboard</h1>
+          <div className="header-top-row">
+            <h1>My Bookings Dashboard</h1>
+            <div className="verified-status-badge">
+              <span className="badge-icon">🛡️</span>
+              Verified Profile
+            </div>
+          </div>
           <p className="welcome-text">Track your service requests and manage your path to wisdom.</p>
         </header>
 

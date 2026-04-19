@@ -48,6 +48,7 @@ const Login = () => {
 
   const showNotification = (type, message) => {
     setNotification({ type, message });
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll up to see the alert
     setTimeout(() => setNotification(null), 5000);
   };
 
@@ -150,15 +151,23 @@ const Login = () => {
     });
 
     if (error) {
-      showNotification('error', error.message);
+      let msg = error.message;
+      
+      if (error.message === 'Invalid login credentials') {
+        msg = "Invalid login credentials. If you don't have an account, please click 'Create Account' below to sign up.";
+      } else if (error.message === 'Email not confirmed') {
+        msg = "Email not confirmed. Please check your inbox and click the verification link to activate your account.";
+      }
+        
+      showNotification('error', msg);
       captchaRef.current?.resetCaptcha();
       setCaptchaToken(null);
     } else {
       const userRole = data.user?.user_metadata?.role || 'user';
       if (userRole === 'admin') {
-        navigate('/admin');
+        navigate('/admin', { state: { justLoggedIn: true } });
       } else {
-        navigate('/dashboard');
+        navigate('/dashboard', { state: { justLoggedIn: true } });
       }
     }
     setLoading(false);

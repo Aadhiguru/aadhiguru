@@ -215,10 +215,10 @@ const ProfileSettings = () => {
                 <p>Create a beautiful, astrologically-aligned biodata format instantly. Acceptable across all traditional networks.</p>
                 <div className="ps-price-tag">
                   <span className="ps-original-price">₹99</span>
-                  <span className="ps-offer-price">₹9 Only</span>
+                  <span className="ps-offer-price">FREE</span>
                 </div>
-                <button className="ps-primary-btn" onClick={() => setShowPayment(true)}>
-                  Unlock & Create Biodata 
+                <button className="ps-primary-btn" onClick={() => navigate('/matrimony/create-profile')}>
+                  Create Your Biodata 
                 </button>
               </div>
             </div>
