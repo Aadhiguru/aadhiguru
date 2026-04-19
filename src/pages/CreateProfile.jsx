@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { sanitize } from '../utils/security';
 import './CreateProfile.css';
 
 const CreateProfile = () => {
@@ -56,31 +57,47 @@ const CreateProfile = () => {
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("You must be logged in to create a profile.");
       
+      // Sanitize all inputs
+      const cleanData = {
+        name: sanitize(formData.name),
+        caste: sanitize(formData.caste),
+        sub_caste: sanitize(formData.subCaste),
+        star: sanitize(formData.star),
+        rasi: sanitize(formData.rasi),
+        education: sanitize(formData.education),
+        profession: sanitize(formData.profession),
+        location: sanitize(formData.city),
+        father_occ: sanitize(formData.fatherOcc),
+        mother_occ: sanitize(formData.motherOcc),
+        preview: sanitize(formData.about)
+      };
+
       const { error } = await supabase
         .from('matrimony_profiles')
         .insert([{
-          user_id: user?.id,
+          user_id: user.id,
           gender: formData.gender,
-          name: formData.name,
+          name: cleanData.name,
           age: parseInt(formData.dob ? (new Date().getFullYear() - new Date(formData.dob).getFullYear()) : 25),
           religion: formData.religion,
-          caste: formData.caste,
-          sub_caste: formData.subCaste,
-          star: formData.star,
-          rasi: formData.rasi,
+          caste: cleanData.caste,
+          sub_caste: cleanData.sub_caste,
+          star: cleanData.star,
+          rasi: cleanData.rasi,
           height: formData.height || "5'5\"",
-          education: formData.education,
-          profession: formData.profession,
-          location: formData.city,
+          education: cleanData.education,
+          profession: cleanData.profession,
+          location: cleanData.location,
           income: formData.income,
           complexion: formData.complexion || 'Wheatish',
           diet: formData.diet || 'Vegetarian',
           mother_tongue: formData.motherTongue,
-          father_occ: formData.fatherOcc,
-          mother_occ: formData.motherOcc,
+          father_occ: cleanData.father_occ,
+          mother_occ: cleanData.mother_occ,
           marital_status: formData.maritalStatus,
-          preview: formData.about
+          preview: cleanData.preview
         }]);
 
       if (error) throw error;
@@ -89,11 +106,12 @@ const CreateProfile = () => {
       navigate('/matrimony?created=true');
     } catch (error) {
       console.error('Error creating profile:', error);
-      alert('Error creating profile: ' + error.message);
+      alert('Error: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="cp-page">

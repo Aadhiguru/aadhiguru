@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from '../supabaseClient';
+import { sanitize, validateEmail, validatePhone } from '../utils/security';
 import './Login.css';
 
 const EyeIcon = ({ show }) => (
@@ -22,9 +24,11 @@ const EyeIcon = ({ show }) => (
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const captchaRef = useRef(null);
   const [isLogin, setIsLogin] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
 
   // Form fields
   const [username, setUsername] = useState('');
@@ -36,9 +40,7 @@ const Login = () => {
   const [notification, setNotification] = useState(null);
 
   useEffect(() => {
-    // Force scroll to top so the user always sees the notification/header
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    
     if (location.state?.message) {
       showNotification('info', location.state.message);
     }
@@ -64,18 +66,30 @@ const Login = () => {
     setEmail('');
     setPassword('');
     setPhone('');
+    setCaptchaToken(null);
+    captchaRef.current?.resetCaptcha();
   };
 
   const handleToggleRole = (role) => {
     setIsAdmin(role === 'admin');
+    setCaptchaToken(null);
+    captchaRef.current?.resetCaptcha();
+  };
+
+  const onCaptchaChange = (token) => {
+    setCaptchaToken(token);
   };
 
   const handleSignUpSubmit = async (e) => {
     e.preventDefault();
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!isAdmin && !emailRegex.test(email)) {
-      showNotification('error', "Please enter a valid, real email address format.");
+    if (!captchaToken) {
+      showNotification('error', "Please complete the CAPTCHA.");
+      return;
+    }
+
+    if (!isAdmin && !validateEmail(email)) {
+      showNotification('error', "Please enter a valid email address.");
       return;
     }
 
@@ -84,28 +98,35 @@ const Login = () => {
       return;
     }
 
-    const phoneRegex = /^[6-9]\d{9}$/;
-    if (!isLogin && !isAdmin && !phoneRegex.test(phone)) {
-      showNotification('error', "Please enter a valid 10-digit mobile number (e.g., starting with 6, 7, 8, or 9).");
+    if (!isLogin && !isAdmin && !validatePhone(phone)) {
+      showNotification('error', "Please enter a valid 10-digit mobile number.");
       return;
     }
 
     setLoading(true);
     
+    // Sanitize inputs
+    const cleanUsername = sanitize(username);
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPhone = phone.replace(/\D/g, '');
+
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: cleanEmail,
       password,
       options: {
         data: {
-          username: username,
-          phone: phone,
-          role: isAdmin ? 'admin' : 'user'
+          username: cleanUsername,
+          phone: cleanPhone,
+          role: isAdmin ? 'admin' : 'user',
+          captchaToken: captchaToken // Send token to Supabase (if configured)
         }
       }
     });
 
     if (error) {
       showNotification('error', error.message);
+      captchaRef.current?.resetCaptcha();
+      setCaptchaToken(null);
     } else {
       showNotification('success', 'Sign up successful! Please check your email for verification.');
       setIsLogin(true);
@@ -116,28 +137,24 @@ const Login = () => {
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!isAdmin && !emailRegex.test(email)) {
-      showNotification('error', "Please enter a valid email address.");
+    if (!captchaToken) {
+      showNotification('error', "Please complete the CAPTCHA.");
       return;
     }
 
     setLoading(true);
 
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim().toLowerCase(),
       password
     });
 
     if (error) {
       showNotification('error', error.message);
+      captchaRef.current?.resetCaptcha();
+      setCaptchaToken(null);
     } else {
-      // Store user role and navigate
       const userRole = data.user?.user_metadata?.role || 'user';
-      
-      // For the demo/simple usage, we can store in localStorage to persist across components
-      localStorage.setItem('userPhone', email); // Using email as identifier if phone isn't provided
-      
       if (userRole === 'admin') {
         navigate('/admin');
       } else {
@@ -151,20 +168,20 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/login', // Will redirect back to login or dashboard
+      redirectTo: window.location.origin + '/login',
     });
     
     if (error) {
       showNotification('error', error.message);
     } else {
-      showNotification('success', 'Password reset link has been sent to your email. Please check your inbox.');
+      showNotification('success', 'Password reset link sent to your email.');
       setIsForgotPassword(false);
     }
     setLoading(false);
   };
 
   const handleGoogleLogin = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: window.location.origin + '/dashboard'
@@ -172,11 +189,10 @@ const Login = () => {
     });
 
     if (error) {
-      alert(error.message);
+      showNotification('error', error.message);
     }
   };
 
-  // ── Main Login / Sign Up Form ─────────────────────────────────
   return (
     <div className="login-page">
       <div className="login-container">
@@ -194,18 +210,8 @@ const Login = () => {
 
         {!isForgotPassword && (
           <div className="role-toggle">
-            <button
-              className={`role-btn ${!isAdmin ? 'active' : ''}`}
-              onClick={() => handleToggleRole('user')}
-            >
-              User
-            </button>
-            <button
-              className={`role-btn ${isAdmin ? 'active' : ''}`}
-              onClick={() => handleToggleRole('admin')}
-            >
-              Admin
-            </button>
+            <button className={`role-btn ${!isAdmin ? 'active' : ''}`} onClick={() => handleToggleRole('user')}>User</button>
+            <button className={`role-btn ${isAdmin ? 'active' : ''}`} onClick={() => handleToggleRole('admin')}>Admin</button>
           </div>
         )}
 
@@ -213,22 +219,11 @@ const Login = () => {
           <form className="login-form" onSubmit={handleForgotPassword}>
             <div className="input-group">
               <label>Email</label>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <input type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
-            <button type="submit" className="login-submit-btn" disabled={loading}>
-              {loading ? 'Sending...' : 'Send Reset Link'}
-            </button>
+            <button type="submit" className="login-submit-btn" disabled={loading}>{loading ? 'Sending...' : 'Send Reset Link'}</button>
             <div className="toggle-mode">
-              Remember your password?{' '}
-              <span onClick={() => setIsForgotPassword(false)} className="toggle-link">
-                Back to Login
-              </span>
+              Remember your password? <span onClick={() => setIsForgotPassword(false)} className="toggle-link">Back to Login</span>
             </div>
           </form>
         ) : (
@@ -237,95 +232,54 @@ const Login = () => {
             <>
               <div className="input-group">
                 <label>Username</label>
-                <input
-                  type="text"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
+                <input type="text" placeholder="Enter username" value={username} onChange={(e) => setUsername(e.target.value)} required />
               </div>
               <div className="input-group">
                 <label>Phone Number</label>
-                <input
-                  type="tel"
-                  placeholder="Enter 10-digit mobile number"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  pattern="[6-9][0-9]{9}"
-                  title="Please enter a valid 10-digit mobile number"
-                  required
-                />
+                <input type="tel" placeholder="10-digit mobile number" value={phone} onChange={(e) => setPhone(e.target.value)} required />
               </div>
             </>
           )}
 
           <div className="input-group">
             <label>{isAdmin ? 'Admin ID' : 'Email'}</label>
-            <input
-              type={isAdmin ? 'text' : 'email'}
-              placeholder={isAdmin ? 'Enter admin ID' : 'Enter your email'}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              pattern={isAdmin ? undefined : "[^\\s@]+@[^\\s@]+\\.[^\\s@]+"}
-              title={isAdmin ? undefined : "Please enter a valid email address (e.g., name@gmail.com)"}
-              required
-            />
+            <input type={isAdmin ? 'text' : 'email'} placeholder={isAdmin ? 'Enter admin ID' : 'Enter email'} value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
 
           <div className="input-group">
             <label>Password</label>
             <div className="password-input-wrapper">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button 
-                type="button" 
-                className="eye-btn" 
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label="Toggle password visibility"
-              >
-                <EyeIcon show={showPassword} />
-              </button>
+              <input type={showPassword ? "text" : "password"} placeholder="Enter password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <button type="button" className="eye-btn" onClick={() => setShowPassword(!showPassword)} aria-label="Toggle password visibility"><EyeIcon show={showPassword} /></button>
             </div>
-            
             {!isLogin && (
               <div className="password-requirements">
-                <div className={`req-item ${passwordReqs.length ? 'met' : ''}`}>
-                  {passwordReqs.length ? '✔' : '○'} At least 8 characters
-                </div>
-                <div className={`req-item ${passwordReqs.uppercase ? 'met' : ''}`}>
-                  {passwordReqs.uppercase ? '✔' : '○'} One uppercase letter
-                </div>
-                <div className={`req-item ${passwordReqs.lowercase ? 'met' : ''}`}>
-                  {passwordReqs.lowercase ? '✔' : '○'} One lowercase letter
-                </div>
-                <div className={`req-item ${passwordReqs.number ? 'met' : ''}`}>
-                  {passwordReqs.number ? '✔' : '○'} One number
-                </div>
-                <div className={`req-item ${passwordReqs.special ? 'met' : ''}`}>
-                  {passwordReqs.special ? '✔' : '○'} One special character
-                </div>
+                <div className={`req-item ${passwordReqs.length ? 'met' : ''}`}>{passwordReqs.length ? '✔' : '○'} 8+ characters</div>
+                <div className={`req-item ${passwordReqs.uppercase ? 'met' : ''}`}>{passwordReqs.uppercase ? '✔' : '○'} Uppercase</div>
+                <div className={`req-item ${passwordReqs.lowercase ? 'met' : ''}`}>{passwordReqs.lowercase ? '✔' : '○'} Lowercase</div>
+                <div className={`req-item ${passwordReqs.number ? 'met' : ''}`}>{passwordReqs.number ? '✔' : '○'} Number</div>
+                <div className={`req-item ${passwordReqs.special ? 'met' : ''}`}>{passwordReqs.special ? '✔' : '○'} Special</div>
               </div>
             )}
           </div>
 
+          <div className="captcha-container" style={{ margin: '1rem 0', display: 'flex', justifyContent: 'center' }}>
+            <HCaptcha
+              sitekey="10000000-ffff-ffff-ffff-000000000001" // Demo sitekey, replace with real one
+              onVerify={onCaptchaChange}
+              ref={captchaRef}
+              theme="dark"
+            />
+          </div>
+
           {isLogin && (
             <div className="form-options">
-              <label className="remember-me">
-                <input type="checkbox" /> Remember me
-              </label>
-              <button type="button" onClick={() => setIsForgotPassword(true)} className="forgot-password btn-link">
-                Forgot password?
-              </button>
+              <label className="remember-me"><input type="checkbox" /> Remember me</label>
+              <button type="button" onClick={() => setIsForgotPassword(true)} className="forgot-password btn-link">Forgot password?</button>
             </div>
           )}
 
-          <button type="submit" className="login-submit-btn" disabled={loading}>
+          <button type="submit" className="login-submit-btn" disabled={loading || !captchaToken}>
             {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Sign Up')}
           </button>
 
@@ -350,9 +304,7 @@ const Login = () => {
         {!isAdmin && !isForgotPassword && (
           <div className="toggle-mode">
             {isLogin ? "Don't have an account? " : 'Already have an account? '}
-            <span onClick={handleToggleMode} className="toggle-link">
-              {isLogin ? 'Sign up' : 'Log in'}
-            </span>
+            <span onClick={handleToggleMode} className="toggle-link">{isLogin ? 'Sign up' : 'Log in'}</span>
           </div>
         )}
       </div>
@@ -361,3 +313,4 @@ const Login = () => {
 };
 
 export default Login;
+

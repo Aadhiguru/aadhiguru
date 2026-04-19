@@ -1,26 +1,29 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import './UserDashboard.css';
 
 const UserDashboard = () => {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const userPhone = localStorage.getItem('userPhone');
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const initFetch = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        window.location.href = '/login';
+        navigate('/login');
         return;
       }
       
-      const email = session.user.email;
+      setUser(session.user);
+      
+      // Fetch bookings where user_id matches (RLS will enforce this too)
       const { data, error } = await supabase
         .from('bookings')
         .select('*')
-        .eq('phone_number', userPhone) // The logic uses phone_number in the DB currently
+        .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -34,41 +37,45 @@ const UserDashboard = () => {
     initFetch();
 
     // Set up realtime subscription for updates
-    if (userPhone) {
-      const channel = supabase.channel('user-bookings')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'bookings', filter: `phone_number=eq.${userPhone}` },
-        (payload) => {
-          console.log('Realtime update:', payload);
-          if (payload.eventType === 'INSERT') {
-            setBookings(prev => [payload.new, ...prev]);
-          } else if (payload.eventType === 'UPDATE') {
-            setBookings(prev => prev.map(b => b.id === payload.new.id ? payload.new : b));
-          } else if (payload.eventType === 'DELETE') {
-            setBookings(prev => prev.filter(b => b.id !== payload.old.id));
-          }
-        }
-      )
-      .subscribe();
+    // In production, we filter by user_id in the channel too
+    const channel = supabase.channel('user-bookings')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'bookings' },
+      (payload) => {
+        // Double check on client side although RLS should handle it
+        const { data: { session } } = supabase.auth.getSession().then(({data}) => {
+           if (data.session && (payload.new?.user_id === data.session.user.id || payload.old?.user_id === data.session.user.id)) {
+              if (payload.eventType === 'INSERT') {
+                setBookings(prev => [payload.new, ...prev]);
+              } else if (payload.eventType === 'UPDATE') {
+                setBookings(prev => prev.map(b => b.id === payload.new.id ? payload.new : b));
+              } else if (payload.eventType === 'DELETE') {
+                setBookings(prev => prev.filter(b => b.id !== payload.old.id));
+              }
+           }
+        });
+      }
+    )
+    .subscribe();
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-  }, [userPhone]);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [navigate]);
 
   const handleCancelBooking = async (bookingId) => {
     if (!window.confirm("Are you sure you want to cancel and delete this booking request?")) return;
     
+    // RLS will ensure user can only delete their own 'pending' bookings
     const { error } = await supabase
       .from('bookings')
       .delete()
-      .eq('id', bookingId);
+      .eq('id', bookingId)
+      .eq('user_id', user.id);
 
     if (error) {
-      alert("Failed to cancel booking. Please try again.");
-      console.error(error);
+      alert("Failed to cancel booking. " + error.message);
     }
   };
 
@@ -82,7 +89,7 @@ const UserDashboard = () => {
           <p className="welcome-text">Track your service requests and manage your path to wisdom.</p>
         </header>
 
-        {!userPhone || bookings.length === 0 ? (
+        {!user || bookings.length === 0 ? (
           <div className="empty-dashboard">
             <div className="empty-icon">📅</div>
             <h3>No Active Bookings</h3>
@@ -173,3 +180,4 @@ const UserDashboard = () => {
 };
 
 export default UserDashboard;
+

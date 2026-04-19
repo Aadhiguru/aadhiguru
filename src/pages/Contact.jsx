@@ -1,31 +1,55 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
+import { sanitize, validateEmail as isValidEmail } from '../utils/security';
 import './Contact.css';
 
 const Contact = () => {
+  const captchaRef = useRef(null);
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [captchaToken, setCaptchaToken] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const validateEmail = (e) => {
     const value = e.target.value;
     setEmail(value);
     
-    // Regex for robust email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
-    if (value && !emailRegex.test(value)) {
+    if (value && !isValidEmail(value)) {
       setEmailError('Please enter a valid email address (e.g. name@example.com)');
     } else {
       setEmailError('');
     }
   };
 
-  const handleSubmit = (e) => {
+  const onCaptchaChange = (token) => {
+    setCaptchaToken(token);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (emailError) {
       alert('Please fix the invalid email address before submitting.');
       return;
     }
-    alert('Thank you! Your message has been sent.');
+
+    if (!captchaToken) {
+      alert('Please complete the CAPTCHA.');
+      return;
+    }
+
+    setLoading(true);
+    
+    // In a real app, you would send this to your backend/Supabase
+    // const cleanName = sanitize(e.target.name.value);
+    // const cleanMessage = sanitize(e.target.message.value);
+    
+    setTimeout(() => {
+      alert('Thank you! Your message has been sent.');
+      setLoading(false);
+      setCaptchaToken(null);
+      captchaRef.current?.resetCaptcha();
+    }, 1000);
   };
 
   return (
@@ -80,7 +104,7 @@ const Contact = () => {
               <form className="contact-form" onSubmit={handleSubmit} noValidate>
                 <div className="form-group">
                   <label>Full Name</label>
-                  <input type="text" placeholder="Your Name" required />
+                  <input type="text" name="name" placeholder="Your Name" required />
                 </div>
                 <div className="form-group">
                   <label>Email Address</label>
@@ -97,7 +121,7 @@ const Contact = () => {
                 </div>
                 <div className="form-group">
                   <label>Subject</label>
-                  <select required>
+                  <select name="subject" required>
                     <option value="">Select a Topic</option>
                     <option value="astrology">Astrology & Vastu</option>
                     <option value="yoga">Yoga & Meditation</option>
@@ -107,9 +131,21 @@ const Contact = () => {
                 </div>
                 <div className="form-group">
                   <label>Message</label>
-                  <textarea rows="5" placeholder="How can we help you?" required></textarea>
+                  <textarea name="message" rows="5" placeholder="How can we help you?" required></textarea>
                 </div>
-                <button type="submit" className="btn btn-primary w-100" disabled={!!emailError}>Send Message</button>
+
+                <div className="captcha-container" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                  <HCaptcha
+                    sitekey="10000000-ffff-ffff-ffff-000000000001"
+                    onVerify={onCaptchaChange}
+                    ref={captchaRef}
+                    theme="dark"
+                  />
+                </div>
+
+                <button type="submit" className="btn btn-primary w-100" disabled={!!emailError || !captchaToken || loading}>
+                  {loading ? 'Sending...' : 'Send Message'}
+                </button>
               </form>
             </div>
           </div>
@@ -129,3 +165,4 @@ const Contact = () => {
 };
 
 export default Contact;
+
