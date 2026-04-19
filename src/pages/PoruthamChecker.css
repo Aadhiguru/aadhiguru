@@ -558,6 +558,9 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
+  .form-row-pc {
+    grid-template-columns: 1fr;
+  }
   .pc-divider-center {
     flex-direction: row;
     padding: 1.5rem 0;
@@ -584,10 +587,8 @@
   .pc-hero-title { font-size: 1.8rem; }
   .pc-table { font-size: 0.8rem; }
   .pc-table th, .pc-table td { padding: 0.6rem 0.5rem; }
-  .td-desc { display: none; }
-  .td-ta { display: none; }
-  .pc-table thead th:nth-child(3), 
-  .pc-table tbody td:nth-child(3) { display: none; }
+  .td-desc, .th-desc { display: none; }
+  .td-ta, .th-ta { display: none; }
   .pc-benefit { font-size: 0.75rem; padding: 0.3rem 0.75rem; }
   .pc-section-title { font-size: 1.15rem; }
   .pmc-info h4 { font-size: 0.85rem; }

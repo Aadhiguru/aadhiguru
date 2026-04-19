@@ -557,12 +557,12 @@ const PoruthamChecker = () => {
                 <table className="pc-table">
                   <thead>
                     <tr>
-                      <th>#</th>
-                      <th>Porutham Name</th>
-                      <th>தமிழ் பெயர்</th>
-                      <th>Points</th>
-                      <th>Status</th>
-                      <th>Details</th>
+                      <th className="th-num">#</th>
+                      <th className="th-name">Porutham Name</th>
+                      <th className="th-ta">தமிழ் பெயர்</th>
+                      <th className="th-pts">Points</th>
+                      <th className="th-status">Status</th>
+                      <th className="th-desc">Details</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -586,10 +586,11 @@ const PoruthamChecker = () => {
                   </tbody>
                   <tfoot>
                     <tr className="table-total">
-                      <td colSpan={3}><strong>Total Score</strong></td>
-                      <td><strong>{result.totalPts}/{result.maxPts}</strong></td>
-                      <td><strong>{result.pct}%</strong></td>
-                      <td><strong style={{color:result.verdict.color}}>{result.verdict.label}</strong></td>
+                      <td colSpan={2}><strong>Total Score</strong></td>
+                      <td className="td-ta"></td>
+                      <td className="td-pts"><strong>{result.totalPts}/{result.maxPts}</strong></td>
+                      <td className="td-status"><strong>{result.pct}%</strong></td>
+                      <td className="td-desc"><strong style={{color:result.verdict.color}}>{result.verdict.label}</strong></td>
                     </tr>
                   </tfoot>
                 </table>
