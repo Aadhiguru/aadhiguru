@@ -154,9 +154,12 @@ const Login = () => {
       let msg = error.message;
       
       if (error.message === 'Invalid login credentials') {
-        msg = "Invalid login credentials. If you don't have an account, please click 'Create Account' below to sign up.";
+        msg = "Invalid credentials. Please double-check your email/password. If you're sure they are correct, you might need to create an account first.";
       } else if (error.message === 'Email not confirmed') {
-        msg = "Email not confirmed. Please check your inbox and click the verification link to activate your account.";
+        msg = "Email not confirmed. Please check your inbox (and spam folder) for the verification link.";
+      } else {
+        // Show the exact error from Supabase to help us debug
+        msg = `Login Error: ${error.message}`;
       }
         
       showNotification('error', msg);

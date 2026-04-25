@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { sanitize } from '../utils/security';
+import SuccessModal from '../components/SuccessModal';
 import './CreateProfile.css';
 
 const CreateProfile = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
     profileFor: 'Myself',
     name: '',
@@ -102,11 +105,10 @@ const CreateProfile = () => {
 
       if (error) throw error;
 
-      alert('Profile Created Successfully! Finding your perfect matches...');
-      navigate('/matrimony?created=true');
+      setShowSuccess(true);
     } catch (error) {
       console.error('Error creating profile:', error);
-      alert('Error: ' + error.message);
+      setErrorMessage(error.message);
     } finally {
       setLoading(false);
     }
@@ -366,6 +368,21 @@ const CreateProfile = () => {
           </form>
         </div>
       </div>
+
+      <SuccessModal 
+        isOpen={showSuccess} 
+        onClose={() => navigate('/matrimony?created=true')}
+        title="Profile Created!"
+        message="Profile Created Successfully! Finding your perfect matches..."
+        actionText="View Matches"
+      />
+
+      {errorMessage && (
+        <div className="error-toast fade-in">
+          <span>⚠️ {errorMessage}</span>
+          <button onClick={() => setErrorMessage('')}>✕</button>
+        </div>
+      )}
     </div>
   );
 };

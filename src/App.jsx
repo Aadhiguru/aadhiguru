@@ -21,9 +21,11 @@ import Checkout from './pages/Checkout';
 import ProfileSettings from './pages/ProfileSettings';
 import Terms from './pages/Terms';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import ScrollToTop from './components/ScrollToTop';
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="app-container">
         <Intro />
         <Header />

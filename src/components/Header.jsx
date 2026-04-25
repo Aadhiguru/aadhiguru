@@ -59,7 +59,10 @@ const Header = () => {
         <div className="container header-container">
 
           {/* ── Logo ── */}
-          <Link to="/" className="logo-link" onClick={() => setMenuOpen(false)}>
+          <Link to="/" className="logo-link" onClick={() => {
+            setMenuOpen(false);
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          }}>
             <img src="/images/logo-final.png" alt="Sri AadhiGuru Education" className="site-logo" fetchPriority="high" />
             <div className="logo-text-block">
               <span className="logo-name">Sri AadhiGuru</span>
@@ -78,6 +81,10 @@ const Header = () => {
                     key={link.to}
                     to={link.to}
                     className={`nav-link ${isActive(link) ? 'nav-link-active' : ''}`}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      window.scrollTo({ top: 0, behavior: 'instant' });
+                    }}
                   >
                     {link.icon && <span className="nav-icon">{link.icon}</span>}
                     {link.label}
@@ -103,7 +110,7 @@ const Header = () => {
                   <div className="dropdown-header">
                     <p className="dropdown-email">{user.email}</p>
                   </div>
-                  <Link to="/dashboard" className="dropdown-item">
+                  <Link to="/dashboard" className="dropdown-item" onClick={() => window.scrollTo(0, 0)}>
                     <span className="dropdown-icon">📋</span> My Bookings
                   </Link>
                   {user.email === 'aadhiguru.com@gmail.com' && (
@@ -111,7 +118,7 @@ const Header = () => {
                       <span className="dropdown-icon">📈</span> Admin Dashboard
                     </Link>
                   )}
-                  <Link to="/profile" className="dropdown-item">
+                  <Link to="/profile" className="dropdown-item" onClick={() => window.scrollTo(0, 0)}>
                     <span className="dropdown-icon">⚙️</span> Profile Settings
                   </Link>
 
@@ -177,7 +184,10 @@ const Header = () => {
                   key={link.to}
                   to={link.to}
                   className={`drawer-link ${isActive(link) ? 'drawer-link-active' : ''}`}
-                  onClick={() => setMenuOpen(false)}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                  }}
                 >
                   <span className="drawer-link-icon">{link.icon || '›'}</span>
                   {link.label}
@@ -199,7 +209,10 @@ const Header = () => {
                   <span className="drawer-user-email">{user.email}</span>
                 </div>
               </div>
-              <Link to="/dashboard" className="drawer-link" onClick={() => setMenuOpen(false)}>
+              <Link to="/dashboard" className="drawer-link" onClick={() => {
+                setMenuOpen(false);
+                window.scrollTo(0, 0);
+              }}>
                  <span className="drawer-link-icon">📋</span> My Bookings
               </Link>
               {user.email === 'aadhiguru.com@gmail.com' && (

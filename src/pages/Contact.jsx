@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { sanitize, validateEmail as isValidEmail } from '../utils/security';
+import SuccessModal from '../components/SuccessModal';
 import './Contact.css';
 
 const Contact = () => {
@@ -9,6 +10,8 @@ const Contact = () => {
   const [emailError, setEmailError] = useState('');
   const [captchaToken, setCaptchaToken] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const validateEmail = (e) => {
     const value = e.target.value;
@@ -29,12 +32,12 @@ const Contact = () => {
     e.preventDefault();
     
     if (emailError) {
-      alert('Please fix the invalid email address before submitting.');
+      setErrorMessage('Please fix the invalid email address before submitting.');
       return;
     }
 
     if (!captchaToken) {
-      alert('Please complete the CAPTCHA.');
+      setErrorMessage('Please complete the CAPTCHA.');
       return;
     }
 
@@ -45,7 +48,7 @@ const Contact = () => {
     // const cleanMessage = sanitize(e.target.message.value);
     
     setTimeout(() => {
-      alert('Thank you! Your message has been sent.');
+      setShowSuccess(true);
       setLoading(false);
       setCaptchaToken(null);
       captchaRef.current?.resetCaptcha();
@@ -159,7 +162,23 @@ const Contact = () => {
             <p>Our Chennai Office is conveniently located near Masilamanieswarar temple in Thirumullaivoyal.</p>
           </div>
         </div>
+        </div>
       </section>
+
+      <SuccessModal 
+        isOpen={showSuccess}
+        onClose={() => setShowSuccess(false)}
+        title="Message Sent!"
+        message="Thank you for contacting us! Our team will get back to you shortly."
+        actionText="Done"
+      />
+
+      {errorMessage && (
+        <div className="error-toast fade-in" style={{zIndex: 10000, position:'fixed', bottom:'2rem', left:'50%', transform:'translateX(-50%)', background:'#dc2626', color:'white', padding:'1rem 1.5rem', borderRadius:'12px', boxShadow:'0 10px 25px rgba(220, 38, 38, 0.3)', display:'flex', alignItems:'center', gap:'1rem', minWidth:'300px', justifyContent:'space-between'}}>
+          <span>⚠️ {errorMessage}</span>
+          <button onClick={() => setErrorMessage('')} style={{background:'none', border:'none', color:'white', fontSize:'1.2rem', cursor:'pointer', marginLeft:'1rem'}}>✕</button>
+        </div>
+      )}
     </div>
   );
 };

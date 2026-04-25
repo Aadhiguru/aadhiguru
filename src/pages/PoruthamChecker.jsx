@@ -260,6 +260,7 @@ const getVerdict = (pct) => {
 ════════════════════════════════════════════════════ */
 const PoruthamChecker = () => {
   const printRef = useRef();
+  const resultsRef = useRef(null);
 
   const [boyName, setBoyName] = useState('');
   const [boyDob,  setBoyDob]  = useState('');
@@ -273,9 +274,9 @@ const PoruthamChecker = () => {
   const [girlMode, setGirlMode] = useState('auto'); // auto | manual
   const [girlStar, setGirlStar] = useState(0);
 
-  const [result,  setResult]  = useState(null);
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleCheck = (e) => {
     e.preventDefault();
@@ -297,7 +298,7 @@ const PoruthamChecker = () => {
 
       if (boyIdx === null || girlIdx === null || isNaN(boyIdx) || isNaN(girlIdx)) { 
         setLoading(false); 
-        alert("Please ensure all details are selected.");
+        setErrorMessage("Please ensure all details are selected.");
         return; 
       }
 
@@ -331,6 +332,11 @@ const PoruthamChecker = () => {
       }).sort((a,b) => b._score - a._score).slice(0,4);
       setMatches(matched);
       setLoading(false);
+      
+      // Auto-scroll to results on mobile
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     }, 1200);
   };
 
@@ -496,9 +502,9 @@ const PoruthamChecker = () => {
           </button>
         </form>
 
-        {/* ── Results ── */}
         {result && (
-          <div className="pc-results" ref={printRef}>
+          <div className="pc-results" ref={resultsRef}>
+            <div ref={printRef}>
 
             {/* Print Header (hidden on screen) */}
             <div className="print-only">
@@ -648,9 +654,17 @@ const PoruthamChecker = () => {
                 </div>
               </div>
             )}
+            </div>
           </div>
         )}
       </div>
+
+      {errorMessage && (
+        <div className="error-toast fade-in" style={{zIndex: 10000, position:'fixed', bottom:'2rem', left:'50%', transform:'translateX(-50%)', background:'#dc2626', color:'white', padding:'1rem 1.5rem', borderRadius:'12px', boxShadow:'0 10px 25px rgba(220,38,38,0.3)', display:'flex', alignItems:'center', gap:'1rem', minWidth:'300px', justifyContent:'space-between'}}>
+          <span>⚠️ {errorMessage}</span>
+          <button onClick={() => setErrorMessage('')} style={{background:'none', border:'none', color:'white', fontSize:'1.2rem', cursor:'pointer', marginLeft:'1rem'}}>✕</button>
+        </div>
+      )}
     </div>
   );
 };

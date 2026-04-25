@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import PaymentGateway from '../components/PaymentGateway';
+import SuccessModal from '../components/SuccessModal';
 import './Matrimony.css';
 /* ══════════════════════════════════════════════════
    DATA
@@ -463,7 +464,7 @@ const ProfileCard = ({ profile, onViewFull, unlockedIds, shortlisted, onShortlis
         <p className="pcard-bio">{profile.preview}</p>
 
         <div className="pcard-actions">
-          <button className="pcard-interest-btn" onClick={() => alert('Interest sent to ' + profile.name + '!')}>
+          <button className="pcard-interest-btn" onClick={() => onViewFull(profile, 'interest')}>
             ❤️ Express Interest
           </button>
           {isUnlocked ? (
@@ -520,6 +521,9 @@ const Matrimony = () => {
   const [shortlisted, setShortlisted] = useState([]);
   const [showUserForm, setShowUserForm] = useState(!isCreated);
   const [profilesList, setProfilesList] = useState(allProfiles);
+  const [interestName, setInterestName] = useState('');
+  const [showInterestSuccess, setShowInterestSuccess] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -585,6 +589,15 @@ const Matrimony = () => {
     prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
   );
 
+  const handleAction = (profile, type) => {
+    if (type === 'interest') {
+      setInterestName(profile.name);
+      setShowInterestSuccess(true);
+    } else {
+      setModalState({ profile, type });
+    }
+  };
+
   return (
     <main className="mp">
       {/* ════════ HERO ════════ */}
@@ -606,29 +619,32 @@ const Matrimony = () => {
           </div>
 
           {showUserForm ? (
-            <div className="mp-search-card" style={{ textAlign: 'center', padding: '5rem 3rem' }}>
-              <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>💍</div>
-              <h2 className="search-card-title" style={{ fontSize: '2.2rem', marginBottom: '1rem' }}>Find Your Perfect Match</h2>
-              <p className="search-card-sub" style={{ marginBottom: '3.5rem', maxWidth: '450px', margin: '0 auto', lineHeight: '1.6', fontSize: '1.1rem' }}>
+            <div className="mp-search-card" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '4.5rem', marginBottom: '1rem', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))' }}>💍</div>
+              <h2 className="search-card-title" style={{ fontSize: '2rem', marginBottom: '0.8rem', color: '#fff' }}>Find Your Perfect Match</h2>
+              <p className="search-card-sub" style={{ marginBottom: '2.5rem', maxWidth: '420px', margin: '0 auto', lineHeight: '1.6', fontSize: '1.05rem', color: 'rgba(255,255,255,0.6)' }}>
                 Create your complete profile to unlock and view thousands of verified matches tailored just for you.
               </p>
               
               <button 
                 onClick={() => navigate('/matrimony/create-profile')}
-                style={{ width: '100%', maxWidth: '320px', margin: '3.5rem auto 0 auto', display: 'block', padding: '1.25rem', background: 'var(--color-primary)', color: 'white', borderRadius: 'var(--radius-full)', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '1.1rem', transition: 'all 0.3s ease', boxShadow: '0 10px 15px -3px rgba(31,138,112,0.3)' }}
-                onMouseOver={(e) => { e.target.style.transform = 'translateY(-3px)'; e.target.style.boxShadow = '0 15px 20px -5px rgba(31,138,112,0.4)' }}
-                onMouseOut={(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 10px 15px -3px rgba(31,138,112,0.3)' }}
+                className="btn-premium-hero"
               >
-                📝 Create Full Profile
+                <span>📝 Create Full Profile</span>
               </button>
             </div>
           ) : (
             <div className="mp-search-card compact">
               <div className="compact-profile-row">
-                <div className="compact-avatar">{userProfile.gender === 'male' ? '🤵' : '👰'}</div>
+                <div className="compact-avatar">
+                   {userProfile.gender === 'male' ? '🤵' : '👰'}
+                </div>
                 <div>
                   <p className="compact-label">Matching as</p>
-                  <p className="compact-val">{userProfile.gender === 'male' ? 'Groom' : 'Bride'} · {userProfile.age} yrs · {userProfile.caste} · {userProfile.star}</p>
+                  <p className="compact-val">{userProfile.gender === 'male' ? 'Groom' : 'Bride'} · {userProfile.age} yrs</p>
+                  <p className="compact-val" style={{fontSize: '0.85rem', color:'rgba(255,255,255,0.6)', fontWeight: 500}}>
+                    {userProfile.caste} · {userProfile.star}
+                  </p>
                 </div>
               </div>
               <button className="compact-edit-btn" onClick={() => setShowUserForm(true)}>✏️ Edit Profile</button>
@@ -655,14 +671,31 @@ const Matrimony = () => {
       {/* ════════ MAIN CONTENT ════════ */}
       {!showUserForm && (
         <div className="container mp-content">
-          <div className="mp-layout">
+          {/* Mobile Filter Toggle */}
+          <div className="mp-mobile-filter-bar">
+             <button className="mp-filter-toggle-btn" onClick={() => setShowMobileFilters(true)}>
+                <span>🔍 Filter Matches</span>
+                <span className="filter-count-badge">
+                  {Object.values(filters).filter(v => v !== 'All' && v !== 20 && v !== 40).length}
+                </span>
+             </button>
+             <div className="mp-active-tab-indicator">
+                {activeTab === 'all' ? 'All Matches' : activeTab === 'top' ? 'Top Matches' : activeTab === 'new' ? 'New Profiles' : 'Shortlisted'}
+             </div>
+          </div>
 
-            {/* ── FILTER SIDEBAR ── */}
-            <aside className="mp-sidebar">
-              <div className="sidebar-header-row">
-                <h3 className="sidebar-title">🔍 Filter Matches</h3>
-                <button className="sidebar-clear" onClick={resetFilters}>Reset</button>
+          <div className="mp-layout">
+            {/* ── FILTER SIDEBAR (Desktop) / DRAWER (Mobile) ── */}
+            <aside className={`mp-sidebar ${showMobileFilters ? 'mobile-open' : ''}`}>
+              <div className="sidebar-mobile-header">
+                 <h3>Filter Profiles</h3>
+                 <button className="sidebar-close-btn" onClick={() => setShowMobileFilters(false)}>✕</button>
               </div>
+              <div className="sidebar-scroll-area">
+                <div className="sidebar-header-row">
+                  <h3 className="sidebar-title">🔍 Filter Matches</h3>
+                  <button className="sidebar-clear" onClick={resetFilters}>Reset</button>
+                </div>
 
               <FilterAccordion label="Looking For">
                 <div className="filter-radio-row">
@@ -726,7 +759,10 @@ const Matrimony = () => {
                 <p>Unlock all profiles, contact details & more for just <strong>₹999/mo</strong></p>
                 <button className="spb-btn">Upgrade Now</button>
               </div>
+              </div>
             </aside>
+
+            {showMobileFilters && <div className="mp-sidebar-overlay" onClick={() => setShowMobileFilters(false)}></div>}
 
             {/* ── PROFILE AREA ── */}
             <div className="mp-profiles-col">
@@ -754,7 +790,7 @@ const Matrimony = () => {
                 <div className="mp-cards-list">
                   {displayProfiles.map(profile => (
                     <ProfileCard key={profile.id} profile={profile}
-                      onViewFull={(p, t) => setModalState({ profile: p, type: t })}
+                      onViewFull={handleAction}
                       unlockedIds={unlockedIds}
                       shortlisted={shortlisted}
                       onShortlist={toggleShortlist} />
@@ -776,6 +812,14 @@ const Matrimony = () => {
         <FullProfileModal profile={modalState.profile}
           onClose={() => setModalState(null)} />
       )}
+
+      <SuccessModal 
+        isOpen={showInterestSuccess} 
+        onClose={() => setShowInterestSuccess(false)}
+        title="Interest Sent! ❤️"
+        message={`Your interest has been successfully sent to ${interestName}. They will view your profile shortly.`}
+        actionText="Awesome!"
+      />
     </main>
   );
 };
