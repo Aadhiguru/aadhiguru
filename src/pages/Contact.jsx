@@ -162,7 +162,6 @@ const Contact = () => {
             <p>Our Chennai Office is conveniently located near Masilamanieswarar temple in Thirumullaivoyal.</p>
           </div>
         </div>
-        </div>
       </section>
 
       <SuccessModal 
