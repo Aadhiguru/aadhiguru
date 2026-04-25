@@ -275,6 +275,7 @@ const PoruthamChecker = () => {
   const [girlStar, setGirlStar] = useState(0);
 
   const [matches, setMatches] = useState([]);
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
