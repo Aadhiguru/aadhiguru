@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import './AppointmentForm.css';
 import SuccessModal from './SuccessModal';
+import Toast from './Toast';
 
 const AppointmentForm = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -90,7 +92,7 @@ const AppointmentForm = () => {
       });
     } catch (error) {
       console.error('Error saving booking:', error);
-      alert('Error saving booking: ' + error.message);
+      setToast({ message: 'Error saving booking: ' + error.message, type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -168,6 +170,7 @@ const AppointmentForm = () => {
         message="Thank you for booking an appointment. Our team will contact you shortly to confirm your slot."
         actionText="Done"
       />
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </section>
   );
 };

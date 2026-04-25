@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import PaymentGateway from '../components/PaymentGateway';
+import Toast from '../components/Toast';
 
 const PaymentPage = () => {
   const [searchParams] = useSearchParams();
@@ -10,6 +11,7 @@ const PaymentPage = () => {
   const [loading, setLoading] = useState(true);
   const [paymentMode, setPaymentMode] = useState('full');
   const [showGateway, setShowGateway] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     if (id) {
@@ -32,9 +34,11 @@ const PaymentPage = () => {
       .update({ payment_status: paymentMode === 'full' ? 'paid' : 'partial' })
       .eq('id', id)
       .then(() => {
-        alert('Payment processed successfully!');
-        setShowGateway(false);
-        window.location.reload();
+        setToast({ message: 'Payment processed successfully!', type: 'success' });
+        setTimeout(() => {
+          setShowGateway(false);
+          window.location.reload();
+        }, 1500);
       });
   };
 
@@ -101,6 +105,7 @@ const PaymentPage = () => {
           onClose={() => setShowGateway(false)}
         />
       )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };

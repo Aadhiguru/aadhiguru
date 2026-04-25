@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import './Classes.css';
 import SuccessModal from '../components/SuccessModal';
+import Toast from '../components/Toast';
 
 const initialClasses = [
   { id: 1, title_en: "Introduction to Vastu Shastra", title_ta: "வாஸ்து சாஸ்திரம் அறிமுகம்", date: "2026-04-10", price: 1500, attendees: 12, thumbnail: "/vastu_thumbnail.png" },
@@ -44,6 +45,7 @@ const Classes = () => {
   const [newDate, setNewDate] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newThumbnail, setNewThumbnail] = useState('');
+  const [toast, setToast] = useState(null);
  
   useEffect(() => {
     // Check if current user is the authoritative admin
@@ -64,7 +66,7 @@ const Classes = () => {
   const handleAddClass = (e) => {
     e.preventDefault();
     if (!isAuthoritativeAdmin) {
-      alert("Unauthorized: You do not have permission to manage classes.");
+      setToast({ message: "Unauthorized: You do not have permission to manage classes.", type: 'error' });
       return;
     }
     if (!newTitleEn || !newDate || !newPrice) return;
@@ -297,6 +299,7 @@ const Classes = () => {
           actionText="View Classes"
         />
         
+        {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       </div>
     </section>
   );

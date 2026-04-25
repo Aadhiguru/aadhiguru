@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import Toast from '../components/Toast';
 import './UserDashboard.css';
 
 const UserDashboard = () => {
@@ -10,6 +11,7 @@ const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     if (location.state?.justLoggedIn) {
@@ -86,7 +88,7 @@ const UserDashboard = () => {
       .eq('user_id', user.id);
 
     if (error) {
-      alert("Failed to cancel booking. " + error.message);
+      setToast({ message: "Failed to cancel booking. " + error.message, type: 'error' });
     }
   };
 
@@ -203,6 +205,7 @@ const UserDashboard = () => {
           </div>
         )}
       </div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };

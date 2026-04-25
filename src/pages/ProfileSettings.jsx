@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import PaymentGateway from '../components/PaymentGateway';
+import Toast from '../components/Toast';
 import './ProfileSettings.css';
 
 const ProfileSettings = () => {
@@ -16,6 +17,7 @@ const ProfileSettings = () => {
     email: ''
   });
   const [savingBasicInfo, setSavingBasicInfo] = useState(false);
+  const [toast, setToast] = useState(null);
 
   // Biodata State
   const [hasBiodata, setHasBiodata] = useState(false);
@@ -98,10 +100,10 @@ const ProfileSettings = () => {
            email: basicInfo.email
         }]);
       }
-      alert('Basic information updated successfully!');
+      setToast({ message: 'Basic information updated successfully!', type: 'success' });
     } catch (err) {
       console.error('Error saving basic info', err);
-      alert('Failed to update basic information.');
+      setToast({ message: 'Failed to update basic information.', type: 'error' });
     } finally {
       setSavingBasicInfo(false);
     }
@@ -236,6 +238,7 @@ const ProfileSettings = () => {
           onPaymentSuccess={handlePaymentSuccess} 
         />
       )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };

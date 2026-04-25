@@ -133,20 +133,26 @@
 
 /* ── Search Card ── */
 .mp-search-card {
-  background: rgba(255, 255, 255, 0.08); /* Dark glassmorphism by default for hero area */
-  border-radius: 24px;
-  padding: 2.25rem;
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 28px;
+  padding: 2.5rem;
+  box-shadow: 
+    0 40px 100px rgba(0, 0, 0, 0.4), 
+    inset 0 1px 1px rgba(255, 255, 255, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mp-hero .mp-search-card.compact {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.25), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  padding: 1.5rem 2rem;
 }
 
 .search-card-title {
@@ -1685,12 +1691,52 @@
   .compact-edit-btn {
     width: 100%;
     text-align: center;
-    padding: 0.8rem;
-    background: rgba(255, 255, 255, 0.15);
+    padding: 1rem;
+    background: #fff;
+    color: var(--color-primary);
+    font-weight: 800;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    border: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
   
   .compact-edit-btn:hover {
-    transform: none;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    background: #f8fafc;
+  }
+
+  .ms-chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+
+  .ms-chip {
+    padding: 0.65rem 1.1rem;
+    border-radius: 24px;
+    border: 1.5px solid #e2e8f0;
+    background: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  }
+
+  .ms-chip-active {
+    border-color: var(--color-primary) !important;
+    background: #f0fdf4 !important;
+    color: var(--color-primary) !important;
+    box-shadow: 0 4px 12px rgba(31, 138, 112, 0.12) !important;
+    transform: translateY(-1px);
   }
 
   .pcard-actions { flex-direction: column; }
