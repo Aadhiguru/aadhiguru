@@ -228,7 +228,8 @@ const CreateProfile = () => {
                   )}
                   <div className="form-group">
                     <label>Mother Tongue</label>
-                    <select name="motherTongue" value={formData.motherTongue} onChange={handleChange}>
+                    <select name="motherTongue" value={formData.motherTongue} onChange={handleChange} required>
+                      <option value="">Select Language</option>
                       <option>Tamil</option>
                       <option>Telugu</option>
                       <option>Malayalam</option>
@@ -246,7 +247,8 @@ const CreateProfile = () => {
                 <div className="form-grid">
                   <div className="form-group">
                     <label>Religion</label>
-                    <select name="religion" value={formData.religion} onChange={handleChange}>
+                    <select name="religion" value={formData.religion} onChange={handleChange} required>
+                      <option value="">Select Religion</option>
                       <option>Hindu</option>
                       <option>Christian</option>
                       <option>Muslim</option>
@@ -256,23 +258,23 @@ const CreateProfile = () => {
                   </div>
                   <div className="form-group">
                     <label>Caste</label>
-                    <input type="text" name="caste" placeholder="e.g. Mudaliar, Brahmin" value={formData.caste} onChange={handleChange} />
+                    <input type="text" name="caste" placeholder="e.g. Mudaliar, Brahmin" value={formData.caste} onChange={handleChange} required />
                   </div>
                   <div className="form-group">
                     <label>Sub-Caste</label>
-                    <input type="text" name="subCaste" placeholder="e.g. Saiva Pillai" value={formData.subCaste} onChange={handleChange} />
+                    <input type="text" name="subCaste" placeholder="e.g. Saiva Pillai (Optional)" value={formData.subCaste} onChange={handleChange} />
                   </div>
                   <div className="form-group">
                     <label>Star / Nakshatra</label>
-                    <input type="text" name="star" placeholder="e.g. Rohini" value={formData.star} onChange={handleChange} />
+                    <input type="text" name="star" placeholder="e.g. Rohini" value={formData.star} onChange={handleChange} required />
                   </div>
                   <div className="form-group">
                     <label>Rasi / Moon Sign</label>
-                    <input type="text" name="rasi" placeholder="e.g. Rishabam" value={formData.rasi} onChange={handleChange} />
+                    <input type="text" name="rasi" placeholder="e.g. Rishabam" value={formData.rasi} onChange={handleChange} required />
                   </div>
                   <div className="form-group">
                     <label>Gothram</label>
-                    <input type="text" name="gothram" placeholder="If applicable" value={formData.gothram} onChange={handleChange} />
+                    <input type="text" name="gothram" placeholder="Optional" value={formData.gothram} onChange={handleChange} />
                   </div>
                 </div>
               </div>
@@ -292,8 +294,8 @@ const CreateProfile = () => {
                   </div>
                   <div className="form-group">
                     <label>Annual Income</label>
-                    <select name="income" value={formData.income} onChange={handleChange}>
-                      <option>Select</option>
+                    <select name="income" value={formData.income} onChange={handleChange} required>
+                      <option value="">Select Income</option>
                       <option>Less than 3 LPA</option>
                       <option>3 - 6 LPA</option>
                       <option>6 - 10 LPA</option>
@@ -303,15 +305,38 @@ const CreateProfile = () => {
                   </div>
                   <div className="form-group">
                     <label>Country Residing in</label>
-                    <input type="text" name="country" value={formData.country} onChange={handleChange} />
+                    <input type="text" name="country" value={formData.country} onChange={handleChange} required />
                   </div>
                   <div className="form-group">
                     <label>State</label>
-                    <input type="text" name="state" value={formData.state} onChange={handleChange} />
+                    <input type="text" name="state" value={formData.state} onChange={handleChange} required />
                   </div>
                   <div className="form-group">
                     <label>City</label>
-                    <input type="text" name="city" required placeholder="e.g. Chennai" value={formData.city} onChange={handleChange} />
+                    <select name="city" value={formData.city} onChange={handleChange} required>
+                      <option value="">Select City</option>
+                      <option>Chennai</option>
+                      <option>Coimbatore</option>
+                      <option>Madurai</option>
+                      <option>Tiruchirappalli</option>
+                      <option>Salem</option>
+                      <option>Tirunelveli</option>
+                      <option>Erode</option>
+                      <option>Vellore</option>
+                      <option>Thoothukudi</option>
+                      <option>Tiruppur</option>
+                      <option>Kanchipuram</option>
+                      <option>Thanjavur</option>
+                      <option>Dindigul</option>
+                      <option>Cuddalore</option>
+                      <option>Nagercoil</option>
+                      <option>Bangalore</option>
+                      <option>Hyderabad</option>
+                      <option>Pondicherry</option>
+                      <option>Mumbai</option>
+                      <option>Delhi</option>
+                      <option>Other</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -323,14 +348,14 @@ const CreateProfile = () => {
                 <div className="form-grid">
                   <div className="form-group">
                     <label>Family Type</label>
-                    <select name="familyType" value={formData.familyType} onChange={handleChange}>
+                    <select name="familyType" value={formData.familyType} onChange={handleChange} required>
                       <option>Nuclear Family</option>
                       <option>Joint Family</option>
                     </select>
                   </div>
                   <div className="form-group">
                     <label>Family Status</label>
-                    <select name="familyStatus" value={formData.familyStatus} onChange={handleChange}>
+                    <select name="familyStatus" value={formData.familyStatus} onChange={handleChange} required>
                       <option>Middle Class</option>
                       <option>Upper Middle Class</option>
                       <option>Rich / Affluent</option>
@@ -338,11 +363,11 @@ const CreateProfile = () => {
                   </div>
                   <div className="form-group">
                     <label>Father's Occupation</label>
-                    <input type="text" name="fatherOcc" placeholder="e.g. Business, Retired" value={formData.fatherOcc} onChange={handleChange} />
+                    <input type="text" name="fatherOcc" placeholder="e.g. Business, Retired" value={formData.fatherOcc} onChange={handleChange} required />
                   </div>
                   <div className="form-group">
                     <label>Mother's Occupation</label>
-                    <input type="text" name="motherOcc" placeholder="e.g. Homemaker" value={formData.motherOcc} onChange={handleChange} />
+                    <input type="text" name="motherOcc" placeholder="e.g. Homemaker" value={formData.motherOcc} onChange={handleChange} required />
                   </div>
                   <div className="form-group f-full">
                     <label>About Yourself</label>
