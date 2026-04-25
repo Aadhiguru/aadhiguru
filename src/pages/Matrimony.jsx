@@ -612,7 +612,7 @@ const Matrimony = () => {
               <span className="eyebrow-line"></span>
             </p>
             <h1 className="mp-hero-h1">Find Your Perfect<br /><span className="mp-hero-accent">Life Partner</span></h1>
-            <p className="mp-hero-sub">Vedic Jathagam Matching · Verified Profiles · Trusted by 10,000+ Families</p>
+            <p className="mp-hero-sub">Vedic Jathagam Matching · Verified Profiles · Trusted by 100+ Families</p>
             <Link to="/matrimony/porutham" className="mp-porutham-cta">
               🔮 Free Thirumana Porutham Checker | திருமண பொருத்தம் →
             </Link>
@@ -655,8 +655,8 @@ const Matrimony = () => {
         {/* Stats Strip */}
         <div className="mp-stats-strip">
           {[
-            { n: '10,000+', l: 'Verified Profiles' },
-            { n: '850+', l: 'Success Stories' },
+            { n: '100+', l: 'Verified Profiles' },
+            { n: '100+', l: 'Success Stories' },
             { n: '27 Stars', l: 'Vedic Matching' },
             { n: '100%', l: 'Privacy Protected' },
           ].map(s => (
